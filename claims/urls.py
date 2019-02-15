@@ -16,7 +16,10 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
-urlpatterns = [
-    url(r'^submission/', include('submission.urls')),
-    url(r'^admin/', admin.site.urls),
+from submission.views import Pdf
+
+urlpatterns = [url(r'^admin/', admin.site.urls),
+    url(r'^render/pdf/', Pdf.as_view())
 ]
+
+# url(r'^submission/', include('submission.urls'))
