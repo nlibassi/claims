@@ -5,14 +5,25 @@
 #from django.http import HttpResponse, HttpResponseRedirect
 #from django.views import generic
 
+from django.views import generic
 from django.views.generic import View
 from django.utils import timezone
 from .models import *
 from .render import Render
+from django.contrib.auth.forms import UserCreationForm
+from django.urls import reverse_lazy
+
 
 #from easy_pdf.views import PDFTemplateView
 
 # Create your views here.
+
+
+class SignUp(generic.CreateView):
+    form_class = UserCreationForm
+    success_url = reverse_lazy('login')
+    template_name = 'signup.html'
+
 
 class Pdf(View):
 

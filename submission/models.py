@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+#from django.contrib.auth import get_user_model
 
 from datetime import datetime
 # Create your models here.
@@ -15,7 +16,6 @@ class Products(models.Model):
         db_table = "tutorial_products"
         verbose_name = "Product"
         verbose_name_plural = "Products"
-
 
 
 class Sales(models.Model):
@@ -39,14 +39,18 @@ class Sales(models.Model):
 
 
 # copied from Flask app - modify for Django
-class Insured(models.Model):
+class InsuredProfile(models.Model):
     auto_increment_id = models.AutoField(primary_key=True)
-    username = models.CharField(max_length=64, unique=True)
+    # will be foreign key taken from User model
+    username = models.OneToOneField(User, on_delete=models.CASCADE)
+    # email may also be taken from User if requested at sign up
     email = models.EmailField(max_length=120)
-    password_hash = models.CharField(max_length=128)
+    #password_hash = models.CharField(max_length=128)
     last_seen = models.DateTimeField(default=datetime.utcnow)
+    # may also be taken from User?
     first_name = models.CharField(max_length=64)
     middle_name = models.CharField(max_length=64)
+    # may also be taken from User?
     last_name = models.CharField(max_length=64)
     gender = models.CharField(max_length=1, help_text="Enter 'M' or 'F'")
     date_of_birth = models.DateField()
@@ -79,7 +83,8 @@ class Insured(models.Model):
         return self.username
     
 
-    # modify for Django
+    # modify for Django or delete - probably taken care of in User for Django
+    """
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -102,3 +107,5 @@ class Insured(models.Model):
         except:
             return
         return Insured.query.get(id)
+
+"""

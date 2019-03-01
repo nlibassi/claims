@@ -19,7 +19,8 @@ from django.contrib import admin
 from submission.views import Pdf
 
 urlpatterns = [url(r'^admin/', admin.site.urls),
-    url(r'^render/pdf/', Pdf.as_view())
+    url(r'^render/pdf/', Pdf.as_view()),
+    url(r'^', include('submission.urls')),
 ]
 
 # url(r'^submission/', include('submission.urls'))

@@ -5,3 +5,4 @@ from .models import *
 
 admin.site.register(Sales)
 admin.site.register(Products)
+admin.site.register(InsuredProfile)
