@@ -1,5 +1,6 @@
 
 from django.conf.urls import url, include
+from django.views.generic.base import TemplateView
 
 # import as submission_views in case of a separate app in the future - activate later
 from . import views
@@ -31,6 +32,13 @@ from django.contrib.auth.views import(
 # 
 
 urlpatterns = [
+    url(r'^', include('django.contrib.auth.urls')),
     url(r'^signup/$', views.SignUp.as_view(), name='register'),
-    url('^', include('django.contrib.auth.urls')),
+    url(r'^create_insured_profile/$', views.InsuredProfileCreate.as_view(), name='create_insured_profile'),
+    url(r'', TemplateView.as_view(template_name='welcome.html'), name='welcome'),
+    url(r'^profile_complete/$', TemplateView.as_view(template_name='profile_complete.html'), name='profile_complete'),
+    url(r'', TemplateView.as_view(template_name='file_claim_report.html'), name='file_claim_report'),
     ]
+
+# may try to add username to url as below
+#url(r'(?P<username>)/welcome/$', TemplateView.as_view(template_name='welcome.html'), name='welcome')

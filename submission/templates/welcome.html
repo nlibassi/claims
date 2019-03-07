@@ -1,0 +1,18 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+    {% if user.first_name %}
+        <p>Welcome, {{ user.first_name}}.</p>
+    {% else %}
+        <p>Welcome, {{ user.get_username }}. Thanks for logging in.</p>
+        <h3>Please complete your profile before filing a claim.</h3>
+        <a href="{% url 'create_insured_profile' %}">Complete Profile</a>
+    {% endif %}
+{% else %}
+    <p>Welcome, new user. Please log in.</p>
+{% endif %}
+{% endblock %}
+

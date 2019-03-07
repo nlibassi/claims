@@ -1,0 +1,9 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Profile Complete{% endblock %}
+
+{% block content %}
+    <p>Thanks for completing your profile, {{ user.username}}.</p>
+    <a href="{% url 'file_claim_report' %}">File Claim Report</a>
+{% endblock %}
+
