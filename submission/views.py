@@ -8,15 +8,21 @@
 from django.views import generic
 from django.views.generic import View
 from django.utils import timezone
-from .models import *
+# add other models by name later
+from .models import InsuredProfile, InsuredProfileForm 
 from .render import Render
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
+
 from django.urls import reverse_lazy
 
 from .models import InsuredProfile 
 
 from django.shortcuts import redirect
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from django.views.decorators.http import require_http_methods
 
 #from easy_pdf.views import PDFTemplateView
 
@@ -31,33 +37,74 @@ class SignUp(generic.CreateView):
 
 class Welcome(generic.TemplateView):
     #success_url = reverse_lazy('welcome')
-    #template_name = 'welcome.html'
+    template_name = 'welcome.html'
+
+    # get() method not required with TemplateView
+    """
     def get(self, request):
         params = {'request': request}
         return Render.render('welcome.html', params)
+    """
 
+# add login_required decorator to class or function
 
-class InsuredProfileCreate(generic.CreateView):
+class InsuredProfileCreate(LoginRequiredMixin, generic.CreateView):
+    #login_url = '/login/'
     model = InsuredProfile
-    success_url = '/profile_complete'
-    fields = ['email', 'first_name', 'middle_name', 'last_name', 'gender',
-                    'date_of_birth', 'air_id', 'mailing_street', 'mailing_optional', 'mailing_city',
-                    'mailing_state', 'mailing_zip', 'mailing_country', 'residence_country',
-                    'foreign_currency_default', 'other_coverage', 'other_insurance_co',
-                    'other_plan_name', 'other_plan_id', 'medicare_part_a', 'medicare_part_b',
-                    'medicare_id', 'full_time_student', 'has_dependent']
+    http_method_names = ['get', 'post']
+    form_class = InsuredProfileForm
+    success_url = reverse_lazy('profile_complete')
+    def form_valid(self,form):
+        super(InsuredProfileCreate, self).form_valid(form)
+        # Add action to valid form phase
+        messages.success(self.request, 'Profile created successfully!')        
+        return HttpResponseRedirect(self.get_success_url())        
+    def form_invalid(self,form):
+        # Add action to invalid form phase
+        messages.info(self.request, 'Profile not created')
+        return self.render_to_response(self.get_context_data(form=form))
+    # no need to provide template name as it uses insuredprofile_form.html by default
+
+    """
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        return super(InsuredProfileCreate, self).form_valid(form)
+    """
+    #def post(...) needed or is this included in a CreateView
+
+
     # no need to give a template OR forms.py in this situation? 
     # form and template auto-created?
     #template_name = 'whatever.html'
     # function needed for saving info or only in template?
 
+""" 
+#@require_http_methods(["GET", "POST"])
+def insured_profile_complete(request):
+    params = {'request': request}
+    if request.method ==  'POST':
+        # fill in each field here
+        # return
+    else:
 
+        #return Render.render('profile_complete.html', params)
+"""
 class InsuredProfileComplete(generic.TemplateView):
-
-    def get(self, request):
+    template_name = 'profile_complete.html'
+    http_method_names = ['get', 'post']
+    def get_context_data(self, *args, **kwargs):
+        context = super(InsuredProfileComplete.self).get_context_data(*args, **kwargs)
+        context['message'] = 'Testing'
+        return context
+    #http_method_names = ['get', 'post']
+"""
+class InsuredProfileComplete(View):
+    def post(self, request):
         params = {'request': request}
         return Render.render('profile_complete.html', params)
-
+ 
+    #def post(self, request, *args, **kwargs):
+"""
 
 
 

@@ -102,8 +102,24 @@ class InsuredProfile(models.Model):
         return self.username
 
     def get_absolute_url(self):
-        return reverse('insured-detail', kwargs={'pk' : self.pk})
+        return reverse('create_user_profile', kwargs={'pk' : self.pk})
     
+
+# form works just fine without this as long as fields are defined in the view
+class InsuredProfileForm(forms.ModelForm):
+    class Meta:
+        model = InsuredProfile
+        fields = ['email', 'first_name', 'middle_name', 'last_name', 'gender',
+                    'date_of_birth', 'air_id', 'mailing_street', 'mailing_optional', 'mailing_city',
+                    'mailing_state', 'mailing_zip', 'mailing_country', 'residence_country',
+                    'foreign_currency_default', 'other_coverage', 'other_insurance_co',
+                    'other_plan_name', 'other_plan_id', 'medicare_part_a', 'medicare_part_b',
+                    'medicare_id', 'full_time_student', 'has_dependent']
+        widgets = {
+                'description': forms.Textarea(),
+        }
+
+
 
     # modify for Django or delete - probably taken care of in User for Django
     """
