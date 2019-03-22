@@ -2,14 +2,15 @@
 
 #from django.shortcuts import get_object_or_404, render
 
-#from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 #from django.views import generic
 
 from django.views import generic
 from django.views.generic import View
 from django.utils import timezone
 # add other models by name later
-from .models import InsuredProfile, InsuredProfileForm 
+from .models import InsuredProfile
+from .forms import InsuredProfileForm 
 from .render import Render
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -18,11 +19,12 @@ from django.urls import reverse_lazy
 
 from .models import InsuredProfile 
 
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404, render
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.views.decorators.http import require_http_methods
+
 
 #from easy_pdf.views import PDFTemplateView
 
@@ -34,7 +36,14 @@ class SignUp(generic.CreateView):
     success_url = reverse_lazy('login')
     template_name = 'signup.html'
 
-
+    """
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        user.set_password(form.cleaned_data['password'])
+        #user.save()
+        InsuredProfile.objects.create(user=user)
+        return HttpResponse('User registered')
+    """
 class Welcome(generic.TemplateView):
     #success_url = reverse_lazy('welcome')
     template_name = 'welcome.html'
@@ -48,12 +57,81 @@ class Welcome(generic.TemplateView):
 
 # add login_required decorator to class or function
 
+
+class UpdateProfileForm(View):
+    form_class = InsuredProfileForm
+    template_name = 'insuredprofile_form.html'
+
+    # Handle GET HTTP requests
+    def get(self, request, *args, **kwargs):
+        print('get request received')
+        #form = self.form_class(initial=self.initial)
+        if request.user.insuredprofile.profile_complete:
+            profile = request.user.insuredprofile
+            form = self.form_class(request.GET, instance=profile)
+        else:
+            form = self.form_class()
+        return render(request, self.template_name, {'form': form})
+
+    # Handle POST HTTP requests
+    def post(self, request, *args, **kwargs):
+        print('post request received')
+        try:
+            profile = request.user.insuredprofile
+        except InsuredProfile.DoesNotExist:
+            profile = InsuredProfile(user=request.user)
+        form = InsuredProfileForm(request.POST, instance=profile)
+        #form = self.form_class(request.POST)
+        if form.is_valid():
+            form.save()
+            #instance = form.save(commit=False)
+            #instance.user = request.user
+            #instance.save()
+            return HttpResponseRedirect('/profile_updated/')
+
+        return render(request, self.template_name, {'form': form})
+
+def bound_form(request, id): 
+    profile = get_object_or_404(InsuredProfile, id=id)
+    form = InsuredProfileForm(instance=profile) 
+    return render_to_response('insuredprofile_form.html', {'form': form}) 
+
+# partially working FBV 3/21 (post not allowed)
+"""
+def update_profile_form(request):
+    try:
+        instance = request.user.insuredprofile
+    except InsuredProfile.DoesNotExist:
+        instance = InsuredProfile(user=request.user)
+
+    instance = get_object_or_404(InsuredProfile, user=request.user)
+    if request.method == 'POST':
+        print('post request received')
+        form = InsuredProfileForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            print('form is valid')
+            instance = form.save(commit=False)
+            instance.user = request.user
+            instance.save()
+    else:
+        print('non-post request received')
+        form = InsuredProfileForm(instance=instance)
+    context = {
+       "form": form,
+       "instance": instance,}
+    return render(request, "insuredprofile_form.html", context)
+"""
+"""
 class InsuredProfileCreate(LoginRequiredMixin, generic.CreateView):
     #login_url = '/login/'
-    model = InsuredProfile
+    #model = InsuredProfile
+    print('console test - InsuredProfileCreate recognized')
+    # form is displayed without template_name being defined
+    template_name = 'insuredprofile_form.html'
     http_method_names = ['get', 'post']
     form_class = InsuredProfileForm
     success_url = reverse_lazy('profile_complete')
+
     def form_valid(self,form):
         super(InsuredProfileCreate, self).form_valid(form)
         # Add action to valid form phase
@@ -63,39 +141,19 @@ class InsuredProfileCreate(LoginRequiredMixin, generic.CreateView):
         # Add action to invalid form phase
         messages.info(self.request, 'Profile not created')
         return self.render_to_response(self.get_context_data(form=form))
-    # no need to provide template name as it uses insuredprofile_form.html by default
-
-    """
-    def form_valid(self, form):
-        form.instance.created_by = self.request.user
-        return super(InsuredProfileCreate, self).form_valid(form)
-    """
-    #def post(...) needed or is this included in a CreateView
-
-
-    # no need to give a template OR forms.py in this situation? 
-    # form and template auto-created?
-    #template_name = 'whatever.html'
-    # function needed for saving info or only in template?
-
-""" 
-#@require_http_methods(["GET", "POST"])
-def insured_profile_complete(request):
-    params = {'request': request}
-    if request.method ==  'POST':
-        # fill in each field here
-        # return
-    else:
-
-        #return Render.render('profile_complete.html', params)
 """
-class InsuredProfileComplete(generic.TemplateView):
-    template_name = 'profile_complete.html'
-    http_method_names = ['get', 'post']
+
+class InsuredProfileUpdated(generic.TemplateView):
+    print('console test - InsuredProfileUpdated recognized')
+    template_name = 'profile_updated.html'
+    #http_method_names = ['get']
+
+    """
     def get_context_data(self, *args, **kwargs):
         context = super(InsuredProfileComplete.self).get_context_data(*args, **kwargs)
         context['message'] = 'Testing'
         return context
+    """
     #http_method_names = ['get', 'post']
 """
 class InsuredProfileComplete(View):
@@ -105,7 +163,6 @@ class InsuredProfileComplete(View):
  
     #def post(self, request, *args, **kwargs):
 """
-
 
 
 class Pdf(View):

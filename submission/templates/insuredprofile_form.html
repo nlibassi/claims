@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+{% if request.user.insuredprofile.profile_complete %}
+<p>Update profile for {{ request.user.insuredprofile.first_name }}.</p>
+<form method="POST" action="/update_profile/">
+  {% csrf_token %}
+  <table border="0">
+      {{ form }}
+  </table>
+  <button type="submit">Submit</button>
+</form>
+{% else %}
+<p>Complete profile for {{ user.get_username }}.</p>
+<form method="POST" action="/complete_profile/">
+  {% csrf_token %}
+  <table border="0">
+      {{ form }}
+  </table>
+  <button type="submit">Submit</button>
+</form>
+{% endif %}
+{% endblock %}

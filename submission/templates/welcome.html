@@ -3,13 +3,23 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-    {% if user.first_name %}
-        <p>Welcome, {{ user.first_name}}.</p>
+{% if request.user.is_authenticated %}
+    {% if request.user.insuredprofile.profile_complete %}
+        <p>Welcome, {{ request.user.insuredprofile.first_name}}.</p>
+        <h3>Please choose one of the following options:</h3>
+        <a href="{% url 'update_profile_form' %}">Update Insured Profile</a>
+        <br />
+        <a href="{% url 'update_profile_form' %}">Update Dependent Profile</a>
+        <br />
+        <a href="{% url 'update_profile_form' %}">Add Dependent</a>
+        <br />
+        <a href="{% url 'update_profile_form' %}">File Claim</a>
+        <br />
+        <a href="{% url 'logout' %}">Logout</a>
     {% else %}
-        <p>Welcome, {{ user.get_username }}. Thanks for logging in.</p>
+        <p>Welcome, {{ request.user.get_username }}. Thanks for logging in.</p>
         <h3>Please complete your profile before filing a claim.</h3>
-        <a href="{% url 'create_insured_profile' %}">Complete Profile</a>
+        <a href="{% url 'update_profile_form' %}">Complete Profile</a>
         <br />
         <a href="{% url 'logout' %}">Logout</a>
     {% endif %}

@@ -29,20 +29,20 @@ from django.contrib.auth.views import(
 #   url(r'^login/$', LoginView.as_view(template_name='login.html'), name='login'),
 #   url(r'^logout/$', LogoutView.as_view(next_page=reverse_lazy('login')), name='logout')
 
-# 
 
 urlpatterns = [
     url(r'^', include('django.contrib.auth.urls')),
-    
     url(r'^signup/$', views.SignUp.as_view(), name='register'),
-    url(r'^create_insured_profile/$', views.InsuredProfileCreate.as_view(), name='create_insured_profile'),
+    #url(r'^update_profile/$', views.update_profile_form, name='update_profile_form'),
+    url(r'^complete_profile/$', views.UpdateProfileForm.as_view(template_name='insuredprofile_form.html'), name='complete_profile_form'),
+    url(r'^update_profile/$', views.UpdateProfileForm.as_view(template_name='insuredprofile_form.html'), name='update_profile_form'),
     url(r'', TemplateView.as_view(template_name='welcome.html'), name='welcome'),
-    url(r'^profile_complete/$', TemplateView.as_view(template_name='profile_complete.html'), name='profile_complete'),
+    url(r'^profile_updated/$', views.InsuredProfileUpdated.as_view(template_name='profile_updated.html'), name='profile_updated'),
     url(r'^file_claim_report/$', TemplateView.as_view(template_name='file_claim_report.html'), name='file_claim_report'),
     ]
 
 # may try to add username to url as below
 #url(r'(?P<username>)/welcome/$', TemplateView.as_view(template_name='welcome.html'), name='welcome')
-
-
+#url(r'^profile_complete/$', views.insured_profile_complete, name='profile_complete'),
+#url(r'^create_insured_profile/$', views.InsuredProfileCreate.as_view(), name='create_insured_profile')
 #url(r'^profile_complete/$', views.insured_profile_complete, name='profile_complete'),
