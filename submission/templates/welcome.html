@@ -7,13 +7,13 @@
     {% if request.user.insuredprofile.profile_complete %}
         <p>Welcome, {{ request.user.insuredprofile.first_name}}.</p>
         <h3>Please choose one of the following options:</h3>
-        <a href="{% url 'update_profile_form' %}">Update Insured Profile</a>
+        <a href="{% url 'update_profile_form' request.user.insuredprofile.pk %}">Update Insured Profile</a>
         <br />
-        <a href="{% url 'update_profile_form' %}">Update Dependent Profile</a>
+        <a href="{% url 'dependent_profile_update' %}">Update Dependent Profile</a>
         <br />
-        <a href="{% url 'update_profile_form' %}">Add Dependent</a>
+        <a href="{% url 'complete_dependent_profile_form' %}">Add Dependent</a>
         <br />
-        <a href="{% url 'update_profile_form' %}">File Claim</a>
+        <a href="{% url 'update_profile_form' request.user.insuredprofile.pk %}">File Claim</a>
         <br />
         <a href="{% url 'logout' %}">Logout</a>
     {% else %}

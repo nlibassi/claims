@@ -1,0 +1,12 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<p>Add a dependent profile.</p>
+<form method="POST" action="/complete_dependent_profile/">
+  {% csrf_token %}
+  <table border="0">
+      {{ form }}
+  </table>
+  <button type="submit">Submit</button>
+</form>
+{% endblock %}

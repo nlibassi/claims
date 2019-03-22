@@ -6,18 +6,16 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 #from django.views import generic
 
 from django.views import generic
-from django.views.generic import View
+from django.views.generic import View, CreateView, UpdateView, TemplateView
 from django.utils import timezone
 # add other models by name later
-from .models import InsuredProfile
-from .forms import InsuredProfileForm 
+from .models import InsuredProfile, DependentProfile
+from .forms import InsuredProfileForm, DependentProfileForm
 from .render import Render
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 
 from django.urls import reverse_lazy
-
-from .models import InsuredProfile 
 
 from django.shortcuts import redirect, get_object_or_404, render
 
@@ -25,13 +23,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.views.decorators.http import require_http_methods
 
+from django.forms import ModelForm
+
 
 #from easy_pdf.views import PDFTemplateView
 
 # Create your views here.
 
 # is CreateView in django.views.generic or django.views.generic.edit?
-class SignUp(generic.CreateView):
+class SignUp(CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy('login')
     template_name = 'signup.html'
@@ -44,7 +44,7 @@ class SignUp(generic.CreateView):
         InsuredProfile.objects.create(user=user)
         return HttpResponse('User registered')
     """
-class Welcome(generic.TemplateView):
+class Welcome(TemplateView):
     #success_url = reverse_lazy('welcome')
     template_name = 'welcome.html'
 
@@ -57,7 +57,47 @@ class Welcome(generic.TemplateView):
 
 # add login_required decorator to class or function
 
+class InsuredProfileUpdateView(UpdateView):
+    form_class = InsuredProfileForm
+    # may not need to define model here as it is defined in InsuredProfileForm
+    model = InsuredProfile
 
+    def get_success_url(self, request):
+        #pk = request.user.pk
+        return reverse_lazy('profile_updated', kwargs={'pk': request.session['user_id']})
+        #return reverse_lazy('profile_updated', kwargs={'pk': pk})
+
+
+class DependentProfileCreateView(CreateView):
+    form_class = DependentProfileForm
+    template_name = 'dependentform_profile.html'
+    success_url = reverse_lazy('dependent_profile_complete')
+
+    #def form_invalid(self, form):
+        #return http.HttpResponse("form is invalid.. this is just an HttpResponse object")
+
+    def form_valid(self, form):
+        #form.instance.insured = self.request.user
+        profile = form.save(commit=False)
+        profile.insured = self.request.user
+        profile.save()  # This is redundant, see comments. ??
+        return super(DependentProfileCreateView, self).form_valid(form)
+
+# not using
+class DependentProfileCompleteView(TemplateView):
+    template_name = 'dependent_profile_complete.html'
+    
+
+class DependentProfileUpdateView(UpdateView):
+    form_class = DependentProfileForm
+    model = DependentProfile
+
+    def get_success_url(self, request):
+        #pk = request.user.pk
+        return reverse_lazy('dependent_profile_updated', kwargs={'pk': request.session['user_id']})
+        #return reverse_lazy('profile_updated', kwargs={'pk': pk})
+
+"""
 class UpdateProfileForm(View):
     form_class = InsuredProfileForm
     template_name = 'insuredprofile_form.html'
@@ -95,7 +135,7 @@ def bound_form(request, id):
     profile = get_object_or_404(InsuredProfile, id=id)
     form = InsuredProfileForm(instance=profile) 
     return render_to_response('insuredprofile_form.html', {'form': form}) 
-
+"""
 # partially working FBV 3/21 (post not allowed)
 """
 def update_profile_form(request):
