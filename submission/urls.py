@@ -38,11 +38,12 @@ urlpatterns = [
     url(r'^complete_dependent_profile/$', views.DependentProfileCreateView.as_view(template_name='dependentprofile_form.html'), name='complete_dependent_profile_form'),
     #pk here is for insuredprofile not for user
     url(r'^update_profile/(?P<pk>\d+)/$', views.InsuredProfileUpdateView.as_view(template_name='insuredprofile_form.html'), name='update_profile_form'),
-    url(r'', TemplateView.as_view(template_name='welcome.html'), name='welcome'),
     url(r'^profile_updated/$', views.InsuredProfileUpdated.as_view(template_name='profile_updated.html'), name='profile_updated'),
     url(r'^dependent_profile_complete/$', views.DependentProfileCompleteView.as_view(template_name='dependent_profile_complete.html'), name='dependent_profile_complete'),
-    url(r'^dependent_profile_update/$', views.DependentProfileUpdateView.as_view(template_name='dependent_profile_update.html'), name='dependent_profile_update'),
+    url(r'^update_dependent_profile/(?P<pk>\d+)/$', views.DependentProfileUpdateView.as_view(template_name='dependentprofile_form.html'), name='update_dependent_profile'),
+    #url(r'^(?P<first_name>\w+)/$', views.DependentProfileUpdateView.as_view(template_name='dependentprofile_form.html'), name='update_dependent_profile'),
     url(r'^file_claim_report/$', TemplateView.as_view(template_name='file_claim_report.html'), name='file_claim_report'),
+    url(r'', TemplateView.as_view(template_name='welcome.html'), name='welcome'),
     ]
 
 # may try to add username to url as below

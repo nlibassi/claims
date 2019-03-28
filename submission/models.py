@@ -146,7 +146,7 @@ class DependentProfile(models.Model):
                                             ('spouse', 'Spouse'),
                                             ('child', 'Child')
                                             )
-    insured = models.ForeignKey(User, on_delete=None)
+    insured = models.ForeignKey(User, on_delete=None, related_name='dependents')
     first_name = models.CharField('First Name', max_length=64)
     middle_name = models.CharField('Middle Name', max_length=64)
     last_name = models.CharField('Last Name', max_length=64)

@@ -92,6 +92,9 @@ class DependentProfileUpdateView(UpdateView):
     form_class = DependentProfileForm
     model = DependentProfile
 
+    #def get_queryset(self, request):
+        #return super().get_queryset().filter(board=self.kwargs['board_id'])
+
     def get_success_url(self, request):
         #pk = request.user.pk
         return reverse_lazy('dependent_profile_updated', kwargs={'pk': request.session['user_id']})

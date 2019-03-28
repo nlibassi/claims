@@ -9,11 +9,14 @@
         <h3>Please choose one of the following options:</h3>
         <a href="{% url 'update_profile_form' request.user.insuredprofile.pk %}">Update Insured Profile</a>
         <br />
-        <a href="{% url 'dependent_profile_update' %}">Update Dependent Profile</a>
+        <h4>Update Dependent Profile for:</h4>
+        {% for dependent in request.user.dependents.all %}        
+        <a href="{% url 'update_dependent_profile' dependent.pk %}">{{ dependent.first_name }}</a>
+        {% endfor %}
         <br />
         <a href="{% url 'complete_dependent_profile_form' %}">Add Dependent</a>
         <br />
-        <a href="{% url 'update_profile_form' request.user.insuredprofile.pk %}">File Claim</a>
+        <a href="{% url 'update_profile_form' request.user.insuredprofile.pk %}">File Claim Report</a>
         <br />
         <a href="{% url 'logout' %}">Logout</a>
     {% else %}
