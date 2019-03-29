@@ -1,5 +1,5 @@
 from django import forms
-from .models import InsuredProfile, DependentProfile
+from .models import InsuredProfile, DependentProfile, Claim
 
 
 class InsuredProfileForm(forms.ModelForm):
@@ -19,6 +19,7 @@ class InsuredProfileForm(forms.ModelForm):
 
     def save(self, commit=True):
         profile = super(InsuredProfileForm, self).save(commit=commit)
+        # not returning anything?
         #item.code.description = self.cleaned_data['description']
         #item.code.save()
 
@@ -42,3 +43,15 @@ class DependentProfileForm(forms.ModelForm):
         return profile
         #item.code.description = self.cleaned_data['description']
         #item.code.save()
+
+
+class ClaimForm(forms.ModelForm):
+
+    class Meta:
+        model = Claim
+        fields = ['diagnosis', 'employment_related', 'auto_accident_related',
+        'other_accident_related', 'full_time_student', 'claim_type', 'service_date',
+        'service_description', 'service_place', 'foreign_charges', 'foreign_currency']
+        widgets = {
+            'description': forms.Textarea()
+        }

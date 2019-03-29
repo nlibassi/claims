@@ -10,6 +10,7 @@ from django import forms
 from .geography_lists import us_states, countries, currencies
 
 from datetime import datetime
+from django.utils import timezone
 
 from django.utils.translation import ugettext_lazy as _
 # Create your models here.
@@ -162,7 +163,7 @@ class DependentProfile(models.Model):
     medicare_part_a = models.CharField('Medicare Part A coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
     medicare_part_b = models.CharField('Medicare Part B coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
     medicare_id = models.CharField('Medicare ID', max_length=64, null=True, blank=True)
-    full_time_student = models.CharField('Is insured full-time student?', max_length=3, choices=AFFIRM_CHOICES)
+    full_time_student = models.CharField('Is dependent full-time student?', max_length=3, choices=AFFIRM_CHOICES)
 
     @property
     def profile_complete(self):
@@ -180,6 +181,53 @@ class DependentProfile(models.Model):
         verbose_name_plural = 'Dependent Profiles'
 
 
+class Report(models.Model):
+    created = models.DateTimeField(editable=False)
+    insured_profile = models.OneToOneField(InsuredProfile, on_delete=models.PROTECT, null=False)
+    dependent_profile = models.OneToOneField(DependentProfile, on_delete=models.PROTECT, null=True)
+    # is this legal, or should this be a method?
+
+    def save(self, *args, **kwargs):
+        """On save, create timestamp, populate patient_profile"""
+        if not self.id:
+            self.created = timezone.now()
+
+        return super(Report, self).save(*args, **kwargs)
+
+
+class Claim(models.Model):
+    CLAIM_TYPE_CHOICES = (
+                                            ('medical', 'Medical'),
+                                            ('dental', 'Dental'),
+                                            ('vision', 'Vision'),
+                                            ('hearing', 'Hearing'),
+                                            ('prescription', 'Prescription')
+                                            )
+    report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='claims')
+    # tried to avoid repeating this in both Report and Claim - does it matter?
+    insured_profile = models.OneToOneField(InsuredProfile, on_delete=models.PROTECT, null=False)
+    dependent_profile = models.OneToOneField(DependentProfile, on_delete=models.PROTECT, null=True)
+    diagnosis = models.CharField('Diagnosis', max_length=64, null=False)
+    employment_related = models.CharField('Due to employment-related accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)
+    auto_accident_related = models.CharField('Due to auto accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)
+    other_accident_related = models.CharField('Due to other accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)
+    full_time_student = models.CharField('Was patient full-time student at time of service?', max_length=3, choices=AFFIRM_CHOICES)
+    claim_type = models.CharField('Claim Type', max_length=2, choices=CLAIM_TYPE_CHOICES)
+    service_date = models.DateField('Date of Service', null=False)
+    service_description = models.CharField('Description of Service', max_length=64, null=False)
+    service_place = models.CharField('Place of Service', max_length=64, null=False)
+    foreign_charges = models.DecimalField('Foreign Charges', max_digits=18, decimal_places=2)
+    foreign_currency = models.CharField('Foreign Currency Default', max_length=64, choices=CURRENCY_CHOICES, null=False)
+
+    # may not want to do this, and/or it may need to be done before saving - just want to show it in the form
+    def save(self, *args, **kwargs):
+        """
+        On save, populate full_time_student field
+        """
+        if self.dependent_profile:
+            self.full_time_student = self.dependent_profile.full_time_student
+
+        return super(Claim, self).save(*args, **kwargs)
 
 
 

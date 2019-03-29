@@ -41,8 +41,9 @@ urlpatterns = [
     url(r'^profile_updated/$', views.InsuredProfileUpdated.as_view(template_name='profile_updated.html'), name='profile_updated'),
     url(r'^dependent_profile_complete/$', views.DependentProfileCompleteView.as_view(template_name='dependent_profile_complete.html'), name='dependent_profile_complete'),
     url(r'^update_dependent_profile/(?P<pk>\d+)/$', views.DependentProfileUpdateView.as_view(template_name='dependentprofile_form.html'), name='update_dependent_profile'),
+    url(r'^complete_claim_form/(?P<user>\w+)/$', views.ClaimCreateView.as_view(template_name='claim_form.html'), name='complete_claim_form'),
     #url(r'^(?P<first_name>\w+)/$', views.DependentProfileUpdateView.as_view(template_name='dependentprofile_form.html'), name='update_dependent_profile'),
-    url(r'^file_claim_report/$', TemplateView.as_view(template_name='file_claim_report.html'), name='file_claim_report'),
+    #url(r'^file_claim_report/$', TemplateView.as_view(template_name='file_claim_report.html'), name='file_claim_report'),
     url(r'', TemplateView.as_view(template_name='welcome.html'), name='welcome'),
     ]
 

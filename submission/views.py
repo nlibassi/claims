@@ -9,8 +9,8 @@ from django.views import generic
 from django.views.generic import View, CreateView, UpdateView, TemplateView
 from django.utils import timezone
 # add other models by name later
-from .models import InsuredProfile, DependentProfile
-from .forms import InsuredProfileForm, DependentProfileForm
+from .models import InsuredProfile, DependentProfile, Claim
+from .forms import InsuredProfileForm, DependentProfileForm, ClaimForm
 from .render import Render
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -99,6 +99,17 @@ class DependentProfileUpdateView(UpdateView):
         #pk = request.user.pk
         return reverse_lazy('dependent_profile_updated', kwargs={'pk': request.session['user_id']})
         #return reverse_lazy('profile_updated', kwargs={'pk': pk})
+
+class ClaimCreateView(CreateView):
+    form_class = ClaimForm
+    template_name = 'claim_form.html'
+
+    # trying to pre-populate the form with this - should this be done in the form itself instead?
+    def get(self, request, *args, **kwargs):
+        form = self.form_class(initial=self.initial)
+        form.foreign_currency = request.user.insuredprofile.foreign_currency_default
+        return render(request, self.template_name, {'form': form})
+    #success_url = reverse_lazy()
 
 """
 class UpdateProfileForm(View):

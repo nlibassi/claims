@@ -1,0 +1,12 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<p>Complete claim form below:</p>
+<form method="POST" action="/complete_claim_form/">
+  {% csrf_token %}
+  <table border="0">
+      {{ form }}
+  </table>
+  <button type="submit">Submit</button>
+</form>
+{% endblock %}

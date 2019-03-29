@@ -16,7 +16,11 @@
         <br />
         <a href="{% url 'complete_dependent_profile_form' %}">Add Dependent</a>
         <br />
-        <a href="{% url 'update_profile_form' request.user.insuredprofile.pk %}">File Claim Report</a>
+        <h4>Create Claim Report for:</h4>
+        <a href="{% url 'complete_claim_form' request.user %}">{{ insured.first_name }}</a>
+        {% for dependent in request.user.dependents.all %}        
+        <a href="{% url 'complete_claim_form' request.user %}">{{ dependent.first_name }}</a>
+        {% endfor %}
         <br />
         <a href="{% url 'logout' %}">Logout</a>
     {% else %}
