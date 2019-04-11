@@ -57,6 +57,31 @@ class Welcome(TemplateView):
 
 # add login_required decorator to class or function
 
+class InsuredProfileCreateView(CreateView):
+    form_class = InsuredProfileForm
+    # if template name is given in urls shouldn't be necessary here
+    template_name = 'insuredprofile_form.html'
+    # may not need to define model here as it is defined in InsuredProfileForm
+    model = InsuredProfile
+    success_url = reverse_lazy('profile_updated')
+
+    
+    # is this necessary? yes, overriding default form_valid() method so profile gets
+    # saved under current user
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        profile = form.save(commit=False)
+        profile.user = self.request.user
+        profile.save()  # This is redundant, see comments. ??
+        return super(InsuredProfileCreateView, self).form_valid(form)
+
+    """
+    def get_success_url(self, request):
+        #pk = request.user.pk
+        return reverse_lazy('profile_updated', kwargs={'pk': request.session['user_id']})
+        #return reverse_lazy('profile_updated', kwargs={'pk': pk})
+    """
+
 class InsuredProfileUpdateView(UpdateView):
     form_class = InsuredProfileForm
     # may not need to define model here as it is defined in InsuredProfileForm

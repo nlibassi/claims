@@ -5,7 +5,7 @@
 {% block content %}
 {% if request.user.is_authenticated %}
     {% if request.user.insuredprofile.profile_complete %}
-        <p>Welcome, {{ request.user.insuredprofile.first_name}}.</p>
+        <p>Welcome, {{ request.user.insuredprofile.first_name}}</p>
         <h3>Please choose one of the following options:</h3>
         <a href="{% url 'update_profile_form' request.user.insuredprofile.pk %}">Update Insured Profile</a>
         <br />
@@ -17,19 +17,22 @@
         <a href="{% url 'complete_dependent_profile_form' %}">Add Dependent</a>
         <br />
         <h4>Create Claim Report for:</h4>
-        <a href="{% url 'complete_claim_form' request.user %}">{{ insured.first_name }}</a>
-        {% for dependent in request.user.dependents.all %}        
-        <a href="{% url 'complete_claim_form' request.user %}">{{ dependent.first_name }}</a>
-        {% endfor %}
+        <a href="{% url 'complete_claim_form' request.user %}">{{ request.user.insuredprofile.first_name }}</a>
+        {% if request.user.dependents %}
+            {% for dependent in request.user.dependents.all %}        
+            <a href="{% url 'complete_claim_form' request.user %}">{{ dependent.first_name }}</a>
+            {% endfor %}
+        {% endif %}
         <br />
         <a href="{% url 'logout' %}">Logout</a>
     {% else %}
         <p>Welcome, {{ request.user.get_username }}. Thanks for logging in.</p>
         <h3>Please complete your profile before filing a claim.</h3>
-        <a href="{% url 'update_profile_form' %}">Complete Profile</a>
+        <a href="{% url 'complete_insured_profile_form' %}">Complete Profile</a>
         <br />
         <a href="{% url 'logout' %}">Logout</a>
     {% endif %}
+
 {% else %}
     <p>Welcome, new user. Please log in.</p>
 {% endif %}

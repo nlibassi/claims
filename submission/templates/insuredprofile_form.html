@@ -11,8 +11,8 @@
   <button type="submit">Submit</button>
 </form>
 {% else %}
-<p>Complete profile for {{ user.get_username }}.</p>
-<form method="POST" action="/complete_profile/">
+<p>Complete profile for {{ request.user.get_username }}.</p>
+<form method="POST" action="{% url 'complete_insured_profile_form' %}">
   {% csrf_token %}
   <table border="0">
       {{ form }}

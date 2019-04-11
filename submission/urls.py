@@ -33,8 +33,11 @@ from django.contrib.auth.views import(
 urlpatterns = [
     url(r'^', include('django.contrib.auth.urls')),
     url(r'^signup/$', views.SignUp.as_view(), name='register'),
+    url(r'^$', TemplateView.as_view(template_name='welcome.html'), name='welcome'),
     #url(r'^update_profile/$', views.update_profile_form, name='update_profile_form'),
-    url(r'^complete_profile/$', views.InsuredProfileUpdateView.as_view(template_name='insuredprofile_form.html'), name='complete_profile_form'),
+    url(r'^complete_profile/$', views.InsuredProfileCreateView.as_view(template_name='insuredprofile_form.html'), name='complete_insured_profile_form'),
+    #url(r'^complete_profile/(?P<user>\w+)/$', views.InsuredProfileCreateView.as_view(template_name='insuredprofile_form.html'), name='complete_insured_profile_form'),
+    #url(r'^$', views.InsuredProfileCreateView.as_view(template_name='insuredprofile_form.html'), name='complete_insured_profile_form'),
     url(r'^complete_dependent_profile/$', views.DependentProfileCreateView.as_view(template_name='dependentprofile_form.html'), name='complete_dependent_profile_form'),
     #pk here is for insuredprofile not for user
     url(r'^update_profile/(?P<pk>\d+)/$', views.InsuredProfileUpdateView.as_view(template_name='insuredprofile_form.html'), name='update_profile_form'),
@@ -44,7 +47,6 @@ urlpatterns = [
     url(r'^complete_claim_form/(?P<user>\w+)/$', views.ClaimCreateView.as_view(template_name='claim_form.html'), name='complete_claim_form'),
     #url(r'^(?P<first_name>\w+)/$', views.DependentProfileUpdateView.as_view(template_name='dependentprofile_form.html'), name='update_dependent_profile'),
     #url(r'^file_claim_report/$', TemplateView.as_view(template_name='file_claim_report.html'), name='file_claim_report'),
-    url(r'', TemplateView.as_view(template_name='welcome.html'), name='welcome'),
     ]
 
 # may try to add username to url as below

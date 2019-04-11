@@ -75,22 +75,42 @@ US_STATE_CHOICES = tuple(us_states)
 COUNTRY_CHOICES = tuple(countries)
 CURRENCY_CHOICES = tuple(currencies)
 
-# copied from Flask app - modify for Django, blank=True
-class InsuredProfile(models.Model):
-    #auto_increment_id = models.AutoField(primary_key=True)
-    # probably don't need to add unique here
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, unique=True)
-    # email may also be taken from User if requested at sign up
-    email = models.EmailField(max_length=120)
-    #password_hash = models.CharField(max_length=128)
-    last_seen = models.DateTimeField(default=datetime.utcnow)
-    # may also be taken from User?
+
+# fields shared by both InsuredProfile and DependentProfile
+class Profile(models.Model):
+    # this field may need to be taken care of in save() method
+    last_modified = models.DateTimeField(default=datetime.utcnow)
     first_name = models.CharField('First Name', max_length=64)
     middle_name = models.CharField('Middle Name', max_length=64)
-    # may also be taken from User?
     last_name = models.CharField('Last Name', max_length=64)
     gender = models.CharField('Gender', max_length=6, choices=GENDER_CHOICES)
     date_of_birth = models.DateField('Date of Birth', null=True)
+    residence_country = models.CharField('Residence - Country', max_length=64, choices=COUNTRY_CHOICES, null=True)
+    foreign_currency_default = models.CharField('Foreign Currency Default', max_length=64, choices=CURRENCY_CHOICES, null=True)
+    other_coverage = models.CharField('Other health insurance coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
+    other_insurance_co = models.CharField('Other health insurance provider', max_length=64, null=True, blank=True)
+    other_plan_name = models.CharField('Other health plan name', max_length=64, null=True, blank=True)
+    other_plan_id = models.CharField('Other health plan id', max_length=64, null=True, blank=True)
+    medicare_part_a = models.CharField('Medicare Part A coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
+    medicare_part_b = models.CharField('Medicare Part B coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
+    medicare_id = models.CharField('Medicare ID', max_length=64, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Profile'
+        verbose_name_plural = 'Profiles'
+
+    def __repr__(self):
+       return (f'{self.__class__.__name__}('
+                    f'{self.first_name!r} {self.last_name!r})')
+
+# copied from Flask app - modify for Django, blank=True
+class InsuredProfile(Profile):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    #base_profile = models.OneToOneField(Profile, on_delete=None)
+    # email may also be taken from User if requested at sign up
+    email = models.EmailField(max_length=120)
+    #password_hash = models.CharField(max_length=128)
+    # may also be taken from User?
     air_id = models.CharField('AIR ID', max_length=20, null=True, unique=True)
     mailing_street = models.CharField('Mailing - Street', max_length=64, null=True)
     mailing_optional = models.CharField('Mailing - Optional', max_length=64, null=True, blank=True)
@@ -98,71 +118,45 @@ class InsuredProfile(models.Model):
     mailing_state = models.CharField('Mailing - State', max_length=32, choices=US_STATE_CHOICES, null=True)
     mailing_zip = models.CharField('Mailing - Zip', max_length=10, null=True)
     #mailing_country = models.CharField('Mailing - Country', max_length=64, choices=COUNTRY_CHOICES, null=True)
-    residence_country = models.CharField('Residence - Country', max_length=64, choices=COUNTRY_CHOICES, null=True)
-    foreign_currency_default = models.CharField('Foreign Currency Default', max_length=64, choices=CURRENCY_CHOICES, null=True)
-    other_coverage = models.CharField('Other health insurance coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
-    other_insurance_co = models.CharField('Other health insurance provider', max_length=64, null=True, blank=True)
-    other_plan_name = models.CharField('Other health plan name', max_length=64, null=True, blank=True)
-    other_plan_id = models.CharField('Other health plan id', max_length=64, null=True, blank=True)
-    medicare_part_a = models.CharField('Medicare Part A coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
-    medicare_part_b = models.CharField('Medicare Part B coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
-    medicare_id = models.CharField('Medicare ID', max_length=64, null=True, blank=True)
-    full_time_student = models.CharField('Is insured full-time student?', max_length=3, choices=AFFIRM_CHOICES)
+    # this field may or may not be necessary
     has_dependent = models.CharField('Does insured have dependents?', max_length=3, choices=AFFIRM_CHOICES)
+
+    # not sure if this method should stay - may not matter as using try/except when completing/updating profile
+
+    class Meta:
+        verbose_name = 'Insured Profile'
+        verbose_name_plural = 'Insured Profiles'
+
+    def __repr__(self):
+       return (f'{self.__class__.__name__}('
+                    f'{self.user!r})')
     
-    # leftover from Flask?
-    #not a db field but high-level view of relationship 
-    #between insureds and claims - a 'virtual field'
-    #claims = db.relationship('Claim', backref='author', lazy='dynamic')
-    #dependents = db.relationship('Dependent', backref='employee', lazy='dynamic')
-
-    def __str__(self):
-        return str(self.user)
-
-    # not sure if this function should stay - may not matter as using try/except when completing/updating profile
     def create_profile(sender, **kwargs):
         user = kwargs["instance"]
         if kwargs["created"]:
             insured_profile = InsuredProfile(user=user)
             insured_profile.save()
-            
+        
     post_save.connect(create_profile, sender=User)
-
+    
     @property
     def profile_complete(self):
         required_fields = [self.user, self.email, self.first_name, self.last_name, self.gender, self.date_of_birth, self.air_id,
         self.mailing_street, self.mailing_city, self.mailing_state, self.mailing_zip, self.residence_country,
-        self.foreign_currency_default, self.other_coverage, self.medicare_part_a, self.medicare_part_b, self.full_time_student, 
+        self.foreign_currency_default, self.other_coverage, self.medicare_part_a, self.medicare_part_b, 
         self.has_dependent]
         if all(required_fields):
             return True
-        
-    class Meta:
-        verbose_name = 'Insured Profile'
-        verbose_name_plural = 'Insured Profiles'
 
 
-class DependentProfile(models.Model):
+class DependentProfile(Profile):
     RELATIONSHIP_CHOICES = (
                                             ('spouse', 'Spouse'),
                                             ('child', 'Child')
                                             )
     insured = models.ForeignKey(User, on_delete=None, related_name='dependents')
-    first_name = models.CharField('First Name', max_length=64)
-    middle_name = models.CharField('Middle Name', max_length=64)
-    last_name = models.CharField('Last Name', max_length=64)
-    gender = models.CharField('Gender', max_length=6, choices=GENDER_CHOICES)
-    date_of_birth = models.DateField('Date of Birth', null=True)
+    #base_profile = models.OneToOneField(Profile, on_delete=None)
     relationship_to_insured = models.CharField('Relationship to insured', max_length=6, choices=RELATIONSHIP_CHOICES)
-    residence_country = models.CharField('Residence - Country', max_length=64, choices=COUNTRY_CHOICES, null=True)
-    foreign_currency_default = models.CharField('Foreign Currency Default', max_length=64, choices=CURRENCY_CHOICES, null=True)
-    other_coverage = models.CharField('Other health insurance coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
-    other_insurance_co = models.CharField('Other health insurance provider', max_length=64, null=True, blank=True)
-    other_plan_name = models.CharField('Other health plan name', max_length=64, null=True, blank=True)
-    other_plan_id = models.CharField('Other health plan id', max_length=64, null=True, blank=True)
-    medicare_part_a = models.CharField('Medicare Part A coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
-    medicare_part_b = models.CharField('Medicare Part B coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
-    medicare_id = models.CharField('Medicare ID', max_length=64, null=True, blank=True)
     full_time_student = models.CharField('Is dependent full-time student?', max_length=3, choices=AFFIRM_CHOICES)
 
     @property
