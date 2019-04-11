@@ -13,6 +13,8 @@ from datetime import datetime
 from django.utils import timezone
 
 from django.utils.translation import ugettext_lazy as _
+
+from django.template.defaultfilters import slugify
 # Create your models here.
 
 
@@ -94,6 +96,7 @@ class Profile(models.Model):
     medicare_part_a = models.CharField('Medicare Part A coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
     medicare_part_b = models.CharField('Medicare Part B coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
     medicare_id = models.CharField('Medicare ID', max_length=64, null=True, blank=True)
+    slug = models.SlugField()
 
     class Meta:
         verbose_name = 'Profile'
@@ -102,6 +105,11 @@ class Profile(models.Model):
     def __repr__(self):
        return (f'{self.__class__.__name__}('
                     f'{self.first_name!r} {self.last_name!r})')
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.first_name + ' ' + self.last_name)
+        super(Profile, self).save(*args, **kwargs)
+
 
 # copied from Flask app - modify for Django, blank=True
 class InsuredProfile(Profile):

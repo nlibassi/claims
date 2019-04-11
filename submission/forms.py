@@ -54,6 +54,7 @@ class DependentProfileForm(ProfileForm):
 
 
 class ClaimForm(forms.ModelForm):
+    service_date = forms.DateField(widget=forms.SelectDateWidget)
 
     class Meta:
         model = Claim

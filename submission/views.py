@@ -6,10 +6,10 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 #from django.views import generic
 
 from django.views import generic
-from django.views.generic import View, CreateView, UpdateView, TemplateView
+from django.views.generic import View, CreateView, UpdateView, TemplateView, DetailView
 from django.utils import timezone
 # add other models by name later
-from .models import InsuredProfile, DependentProfile, Claim
+from .models import InsuredProfile, DependentProfile, Report, Claim
 from .forms import InsuredProfileForm, DependentProfileForm, ClaimForm
 from .render import Render
 from django.contrib.auth.forms import UserCreationForm
@@ -86,12 +86,21 @@ class InsuredProfileUpdateView(UpdateView):
     form_class = InsuredProfileForm
     # may not need to define model here as it is defined in InsuredProfileForm
     model = InsuredProfile
+    success_url = reverse_lazy('profile_updated')
 
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        profile = form.save(commit=False)
+        profile.user = self.request.user
+        profile.save()  # This is redundant, see comments. ??
+        return super(InsuredProfileUpdateView, self).form_valid(form)
+
+    """
     def get_success_url(self, request):
         #pk = request.user.pk
         return reverse_lazy('profile_updated', kwargs={'pk': request.session['user_id']})
         #return reverse_lazy('profile_updated', kwargs={'pk': pk})
-
+    """
 
 class DependentProfileCreateView(CreateView):
     form_class = DependentProfileForm
@@ -124,6 +133,20 @@ class DependentProfileUpdateView(UpdateView):
         #pk = request.user.pk
         return reverse_lazy('dependent_profile_updated', kwargs={'pk': request.session['user_id']})
         #return reverse_lazy('profile_updated', kwargs={'pk': pk})
+
+
+class ReportCreatedView(DetailView):
+    model = Report
+    template_name = 'report_created.html'
+
+    # from example
+    """
+    def get_context_data(self, **kwargs):
+        context = super(ReportCreatedView, self).get_context_data(**kwargs)
+        context['latest_articles'] = Article.objects.all()[:5]
+        return context
+    """
+
 
 class ClaimCreateView(CreateView):
     form_class = ClaimForm

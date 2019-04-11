@@ -14,13 +14,13 @@
         <a href="{% url 'update_dependent_profile' dependent.pk %}">{{ dependent.first_name }}</a>
         {% endfor %}
         <br />
-        <a href="{% url 'complete_dependent_profile_form' %}">Add Dependent</a>
+        <a href="{% url 'update_profile_form' dependent.pk %}">Add Dependent</a>
         <br />
         <h4>Create Claim Report for:</h4>
-        <a href="{% url 'complete_claim_form' request.user %}">{{ request.user.insuredprofile.first_name }}</a>
+        <a href="{% url 'report_created' request.user %}">{{ request.user.insuredprofile.first_name }}</a>
         {% if request.user.dependents %}
             {% for dependent in request.user.dependents.all %}        
-            <a href="{% url 'complete_claim_form' request.user %}">{{ dependent.first_name }}</a>
+            <a href="{% url 'report_created' dependent.first_name %}">{{ dependent.first_name }}</a>
             {% endfor %}
         {% endif %}
         <br />
@@ -28,7 +28,7 @@
     {% else %}
         <p>Welcome, {{ request.user.get_username }}. Thanks for logging in.</p>
         <h3>Please complete your profile before filing a claim.</h3>
-        <a href="{% url 'complete_insured_profile_form' %}">Complete Profile</a>
+        <a href="{% url 'update_profile_form' request.user.insuredprofile.pk %}">Complete Profile</a>
         <br />
         <a href="{% url 'logout' %}">Logout</a>
     {% endif %}
