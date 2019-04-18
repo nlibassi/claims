@@ -96,7 +96,7 @@ class Profile(models.Model):
     medicare_part_a = models.CharField('Medicare Part A coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
     medicare_part_b = models.CharField('Medicare Part B coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
     medicare_id = models.CharField('Medicare ID', max_length=64, null=True, blank=True)
-    slug = models.SlugField()
+    profile_slug = models.SlugField()
 
     class Meta:
         verbose_name = 'Profile'
@@ -107,7 +107,7 @@ class Profile(models.Model):
                     f'{self.first_name!r} {self.last_name!r})')
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.first_name + ' ' + self.last_name)
+        self.profile_slug = slugify(self.first_name + ' ' + self.last_name)
         super(Profile, self).save(*args, **kwargs)
 
 
@@ -185,16 +185,23 @@ class DependentProfile(Profile):
 
 class Report(models.Model):
     created = models.DateTimeField(editable=False)
-    insured_profile = models.OneToOneField(InsuredProfile, on_delete=models.PROTECT, null=False)
-    dependent_profile = models.OneToOneField(DependentProfile, on_delete=models.PROTECT, null=True)
-    # is this legal, or should this be a method?
+    insured_profile = models.ForeignKey(InsuredProfile, on_delete=models.PROTECT, null=False)
+    dependent_profile = models.ForeignKey(DependentProfile, on_delete=models.PROTECT, null=True)
+    patient_slug = models.SlugField(unique=False)  
 
     def save(self, *args, **kwargs):
-        """On save, create timestamp, populate patient_profile"""
+        """On save, create timestamp, populate patient_profile?"""
         if not self.id:
             self.created = timezone.now()
-
         return super(Report, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Report'
+        verbose_name_plural = 'Reports'
+
+    def __repr__(self):
+       return (f'{self.__class__.__name__}('
+                    f'{self.patient_slug!r} {self.created!r})')
 
 
 class Claim(models.Model):

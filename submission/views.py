@@ -135,9 +135,57 @@ class DependentProfileUpdateView(UpdateView):
         #return reverse_lazy('profile_updated', kwargs={'pk': pk})
 
 
-class ReportCreatedView(DetailView):
+# turn this into CreateReportView - separate view where patient is chosen (single-field form?)
+class ReportCreatedView(View):
     model = Report
     template_name = 'report_created.html'
+    #http_method_names = ['get', 'post']
+
+    # add profile_slug as arg?
+    # seems that this should be a save() method but won't display anything unless it's a get() -  should probably be split up
+    def save(self, request, profile_slug, *args, **kwargs):
+        insured_profile = request.user.insuredprofile
+        report = Report.objects.create(insured_profile=insured_profile)
+        # assuming everyone in the family has a unique first name ??
+        patient_first_name = profile_slug.split('-')[0]
+        #print('Patient first name test: {}'.format(patient_first_name))
+        if patient_first_name != request.user.insuredprofile.first_name:
+            dependent_profiles = request.user.dependents.all()
+            #print('Dependents test: {}'.format(dependent_profiles))
+            for dependent_profile in dependent_profiles:
+                if patient_first_name.title() == dependent_profile.first_name:
+                    #print('selected dependent test: {}'.format(dependent_profile))
+                    report.dependent_profile = dependent_profile
+        report.patient_slug = profile_slug
+        # necessary?
+        report.save()
+
+    def get(self, request, profile_slug):
+        patient_name_list = profile_slug.split('-')
+        patient_name_list = [name.title() for name in patient_name_list]
+        patient_first_last_name = ' '.join(patient_name_list)
+        context = {'patient_first_last_name': patient_first_last_name}
+        return render(request, 'report_created.html', context)
+        #return HttpResponse(profile_slug)
+        #return super(ReportCreatedView, self)
+
+    # trash
+    """
+    def get(self, request):
+        insured_profile = request.user.insuredprofile
+        if request.user.first_name in request:
+            report = Report.objects.create(insured_profile=insured_profile)
+        elif request.user.first_name not in request:
+            for dependent in request.user.dependents.all:
+                if dependent.first_name in request:
+                    dependent_profile = dependent.dependentprofile
+                    report = Report.objects.create(insured_profile=insured_profile, dependent_profile=dependent_profile)
+        else:
+            print('no report created')
+        report.save()
+        return super(ReportCreatedView, self)
+    """
+        
 
     # from example
     """
@@ -157,6 +205,17 @@ class ClaimCreateView(CreateView):
         form = self.form_class(initial=self.initial)
         form.foreign_currency = request.user.insuredprofile.foreign_currency_default
         return render(request, self.template_name, {'form': form})
+
+    # finish writing this
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        claim = form.save(commit=False)
+        claim.insured_profile = self.request.user.insuredprofile
+        # dependent_profile should come from form used to create report
+        #claim.dependent_profile = self.request. # what?
+        claim.save()  # This is redundant, see comments. ??
+        return super(ClaimCreateView, self).form_valid(form)
+
     #success_url = reverse_lazy()
 
 """
