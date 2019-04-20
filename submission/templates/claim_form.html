@@ -1,7 +1,10 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<p>Complete claim form below:</p>
+<p>Complete claim form for {{ request.user.insuredprofile.report.patient_slug }}:</p>
+{% for report in request.user.insuredprofile.reports.all %}
+<p> {{ report.patient_slug}} </p>
+{% endfor %}
 <form method="POST" action="/complete_claim_form/">
   {% csrf_token %}
   <table border="0">

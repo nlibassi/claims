@@ -70,8 +70,8 @@ GENDER_CHOICES = (
 ('female', 'F')
 )
 AFFIRM_CHOICES = (
-    ('yes', 'YES'),
-    ('no', 'NO')
+    ('yes', 'Yes'),
+    ('no', 'No')
     )
 US_STATE_CHOICES = tuple(us_states)
 COUNTRY_CHOICES = tuple(countries)
@@ -162,6 +162,7 @@ class DependentProfile(Profile):
                                             ('spouse', 'Spouse'),
                                             ('child', 'Child')
                                             )
+    # better related name would be dependent_profiles
     insured = models.ForeignKey(User, on_delete=None, related_name='dependents')
     #base_profile = models.OneToOneField(Profile, on_delete=None)
     relationship_to_insured = models.CharField('Relationship to insured', max_length=6, choices=RELATIONSHIP_CHOICES)
@@ -185,16 +186,19 @@ class DependentProfile(Profile):
 
 class Report(models.Model):
     created = models.DateTimeField(editable=False)
-    insured_profile = models.ForeignKey(InsuredProfile, on_delete=models.PROTECT, null=False)
+    insured_profile = models.ForeignKey(InsuredProfile, on_delete=models.PROTECT, null=False, related_name='reports')
     dependent_profile = models.ForeignKey(DependentProfile, on_delete=models.PROTECT, null=True)
+    #submitted = models.BooleanField(default=False, null=False)
     patient_slug = models.SlugField(unique=False)  
 
+    
     def save(self, *args, **kwargs):
         """On save, create timestamp, populate patient_profile?"""
         if not self.id:
             self.created = timezone.now()
+            print('report created at {}'.format(self.created))
         return super(Report, self).save(*args, **kwargs)
-
+    
     class Meta:
         verbose_name = 'Report'
         verbose_name_plural = 'Reports'

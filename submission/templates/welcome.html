@@ -22,7 +22,7 @@
         <a href="{% url 'report_created' request.user.insuredprofile.profile_slug %}">{{ request.user.insuredprofile.first_name }}</a>
         {% if request.user.dependents %}
             {% for dependent in request.user.dependents.all %}        
-            <a href="{% url 'report_created' dependent.dependentprofile.profile_slug %}">{{ dependent.first_name }}</a>
+            <a href="{% url 'report_created' dependent.profile_slug %}">{{ dependent.first_name }}</a>
             {% endfor %}
         {% endif %}
         <br />

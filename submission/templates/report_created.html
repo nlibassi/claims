@@ -4,4 +4,6 @@
 
 {% block content %}
     <p>Report created for  {{ patient_first_last_name }} </p>
+    <br/>
+    <a href="{% url 'complete_claim_form' request.user %}">Add Claim to Report</a>
 {% endblock %}

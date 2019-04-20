@@ -137,13 +137,13 @@ class DependentProfileUpdateView(UpdateView):
 
 # turn this into CreateReportView - separate view where patient is chosen (single-field form?)
 class ReportCreatedView(View):
+    print('ReportCreatedView available')
     model = Report
     template_name = 'report_created.html'
     #http_method_names = ['get', 'post']
-
-    # add profile_slug as arg?
-    # seems that this should be a save() method but won't display anything unless it's a get() -  should probably be split up
-    def save(self, request, profile_slug, *args, **kwargs):
+    
+    # probably shouldn't be creating report in get() method - 
+    def get(self, request, profile_slug):
         insured_profile = request.user.insuredprofile
         report = Report.objects.create(insured_profile=insured_profile)
         # assuming everyone in the family has a unique first name ??
@@ -159,15 +159,14 @@ class ReportCreatedView(View):
         report.patient_slug = profile_slug
         # necessary?
         report.save()
-
-    def get(self, request, profile_slug):
         patient_name_list = profile_slug.split('-')
         patient_name_list = [name.title() for name in patient_name_list]
         patient_first_last_name = ' '.join(patient_name_list)
-        context = {'patient_first_last_name': patient_first_last_name}
-        return render(request, 'report_created.html', context)
+        context = {'patient_first_last_name': patient_first_last_name, 'profile_slug': profile_slug}
+        return render(request, self.template_name, context)
         #return HttpResponse(profile_slug)
         #return super(ReportCreatedView, self)
+ 
 
     # trash
     """

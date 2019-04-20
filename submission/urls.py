@@ -49,7 +49,7 @@ urlpatterns = [
     #url(r'^(?P<first_name>\w+)/$', views.DependentProfileUpdateView.as_view(template_name='dependentprofile_form.html'), name='update_dependent_profile'),
     #url(r'^file_claim_report/$', TemplateView.as_view(template_name='file_claim_report.html'), name='file_claim_report'),
     url(r'^report_created/(?P<profile_slug>[-\w]+)/$', views.ReportCreatedView.as_view(template_name='report_created.html'), name='report_created'),
-    url(r'^$', TemplateView.as_view(template_name='welcome.html'), name='welcome'),
+    url(r'^$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
     ]
 
 # may try to add username to url as below
