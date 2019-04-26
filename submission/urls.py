@@ -35,7 +35,7 @@ urlpatterns = [
     url(r'^signup/$', views.SignUp.as_view(), name='register'),
     #url(r'^update_profile/$', views.update_profile_form, name='update_profile_form'),
     #url(r'^complete_profile/(?P<username>[\w.@+-]+)/$', views.InsuredProfileUpdateView.as_view(template_name='insuredprofile_form.html'), name='complete_profile_form'),
-    url(r'^complete_profile/(?P<pk>\d+)/$', views.InsuredProfileUpdateView.as_view(template_name='insuredprofile_form.html'), name='complete_profile_form'),
+    url(r'^complete_profile/(?P<pk>\d+)/$', views.InsuredProfileCreateView.as_view(template_name='insuredprofile_form.html'), name='complete_profile_form'),
     #url(r'^complete_profile/(?P<user>\w+)/$', views.InsuredProfileCreateView.as_view(template_name='insuredprofile_form.html'), name='complete_insured_profile_form'),
     #url(r'^$', views.InsuredProfileCreateView.as_view(template_name='insuredprofile_form.html'), name='complete_insured_profile_form'),
     url(r'^complete_dependent_profile/$', views.DependentProfileCreateView.as_view(template_name='dependentprofile_form.html'), name='complete_dependent_profile_form'),
@@ -49,6 +49,7 @@ urlpatterns = [
     #url(r'^(?P<first_name>\w+)/$', views.DependentProfileUpdateView.as_view(template_name='dependentprofile_form.html'), name='update_dependent_profile'),
     #url(r'^file_claim_report/$', TemplateView.as_view(template_name='file_claim_report.html'), name='file_claim_report'),
     url(r'^report_created/(?P<profile_slug>[-\w]+)/$', views.ReportCreatedView.as_view(template_name='report_created.html'), name='report_created'),
+    url(r'^claim_list/(?P<profile_slug>[-\w]+)/$', views.ClaimListView.as_view(template_name='claim_list.html'), name='claim_list'),
     url(r'^$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
     ]
 

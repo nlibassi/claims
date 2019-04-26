@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 #from django.views import generic
 
 from django.views import generic
-from django.views.generic import View, CreateView, UpdateView, TemplateView, DetailView
+from django.views.generic import View, CreateView, UpdateView, TemplateView, DetailView, ListView
 from django.utils import timezone
 # add other models by name later
 from .models import InsuredProfile, DependentProfile, Report, Claim
@@ -25,8 +25,36 @@ from django.views.decorators.http import require_http_methods
 
 from django.forms import ModelForm
 
+from django.core.exceptions import ValidationError
+
 
 #from easy_pdf.views import PDFTemplateView
+
+def profile_slug_to_first_last_name(profile_slug):
+    """
+    convert profile slug to first and last name in title case
+    arg: profile slug as string e.g. 'bob-smith'
+    ret: title case version of name as string e.g. 'Bob Smith'
+    """
+    name_list = profile_slug.split('-')
+    name_list = [name.title() for name in name_list]
+    name_first_last_title = ' '.join(name_list)
+    return name_first_last_title
+
+def validate_single_open_report(request, profile_slug):
+    """
+    validates that only one instance of an unsubmitted report exists per person
+    """
+
+    patient_reports = Report.objects.filter(patient_slug=profile_slug)
+    name_first_last_title = profile_slug_to_first_last_name(profile_slug)
+    if patient_reports:
+        if not any([report.submitted for report in patient_reports]):
+            messages.error(request, "Please first submit open report for {}.".format(name_first_last_title))
+            #raise ValidationError("Please first submit open report for {}.".format(name_first_last_title))
+    else:
+        return True
+
 
 # Create your views here.
 
@@ -142,30 +170,26 @@ class ReportCreatedView(View):
     template_name = 'report_created.html'
     #http_method_names = ['get', 'post']
     
-    # probably shouldn't be creating report in get() method - 
+    # probably shouldn't be creating report in get() method but trying to 
+    # minimize user's clicks
     def get(self, request, profile_slug):
         insured_profile = request.user.insuredprofile
-        report = Report.objects.create(insured_profile=insured_profile)
-        # assuming everyone in the family has a unique first name ??
-        patient_first_name = profile_slug.split('-')[0]
-        #print('Patient first name test: {}'.format(patient_first_name))
-        if patient_first_name != request.user.insuredprofile.first_name:
-            dependent_profiles = request.user.dependents.all()
-            #print('Dependents test: {}'.format(dependent_profiles))
-            for dependent_profile in dependent_profiles:
-                if patient_first_name.title() == dependent_profile.first_name:
-                    #print('selected dependent test: {}'.format(dependent_profile))
-                    report.dependent_profile = dependent_profile
-        report.patient_slug = profile_slug
-        # necessary?
-        report.save()
-        patient_name_list = profile_slug.split('-')
-        patient_name_list = [name.title() for name in patient_name_list]
-        patient_first_last_name = ' '.join(patient_name_list)
-        context = {'patient_first_last_name': patient_first_last_name, 'profile_slug': profile_slug}
-        return render(request, self.template_name, context)
-        #return HttpResponse(profile_slug)
-        #return super(ReportCreatedView, self)
+        if validate_single_open_report(request, profile_slug):
+            report = Report.objects.create(insured_profile=insured_profile)
+            if profile_slug != request.user.insuredprofile.profile_slug:
+                dependent_profiles = request.user.dependents.all()
+                for dependent_profile in dependent_profiles:
+                    if dependent_profile.profile_slug == profile_slug:
+                        report.patient_slug = dependent_profile.profile_slug
+            else:
+                report.patient_slug = profile_slug
+            report.save()
+            patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
+            context = {'patient_first_last_name': patient_first_last_name, 'profile_slug': profile_slug}
+            return render(request, self.template_name, context)
+        else:
+            return render(request, 'error.html')
+            # can I render a different view here if validation fails?
  
 
     # trash
@@ -198,12 +222,14 @@ class ReportCreatedView(View):
 class ClaimCreateView(CreateView):
     form_class = ClaimForm
     template_name = 'claim_form.html'
+    success_url = reverse_lazy('claim_list')
 
     # trying to pre-populate the form with this - should this be done in the form itself instead?
     def get(self, request, *args, **kwargs):
         form = self.form_class(initial=self.initial)
         form.foreign_currency = request.user.insuredprofile.foreign_currency_default
         return render(request, self.template_name, {'form': form})
+        #return render(request, self.template_name, {'form': form, 'profile_slug': profile_slug})
 
     # finish writing this
     def form_valid(self, form):
@@ -217,6 +243,16 @@ class ClaimCreateView(CreateView):
 
     #success_url = reverse_lazy()
 
+
+class ClaimListView(ListView):
+    model = Claim
+    template_name = 'claim_list.html'
+
+    def get(self, request, profile_slug, *args, **kwargs):
+        return render(request, self.template_name, {'profile_slug': profile_slug})
+
+    def get_queryset(self, profile_slug):
+        return Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
 """
 class UpdateProfileForm(View):
     form_class = InsuredProfileForm

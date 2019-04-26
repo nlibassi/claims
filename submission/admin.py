@@ -4,6 +4,10 @@ from .models import *
 # should this go in models?
 class ReportAdmin(admin.ModelAdmin):
     readonly_fields = ('created',)
+    list_display = ('patient_slug', 'submitted', 'id',)
+
+class UserAdmin(admin.ModelAdmin):
+    readonly_fields = ('id',)
 # Register your models here.
 
 admin.site.register(Sales)

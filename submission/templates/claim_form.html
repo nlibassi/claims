@@ -5,7 +5,7 @@
 {% for report in request.user.insuredprofile.reports.all %}
 <p> {{ report.patient_slug}} </p>
 {% endfor %}
-<form method="POST" action="/complete_claim_form/">
+<form method="POST" action="{% url 'complete_claim_form' request.user %}">
   {% csrf_token %}
   <table border="0">
       {{ form }}

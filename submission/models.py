@@ -18,6 +18,7 @@ from django.template.defaultfilters import slugify
 # Create your models here.
 
 
+
 class Products(models.Model):
     title = models.CharField(max_length=255)
     price = models.DecimalField(default=0.00, max_digits=18, decimal_places=2)
@@ -66,12 +67,12 @@ class User(AbstractUser):
 """
 
 GENDER_CHOICES = (
-('male', 'M'),
-('female', 'F')
+('m', 'Male'),
+('f', 'Female')
 )
 AFFIRM_CHOICES = (
-    ('yes', 'Yes'),
-    ('no', 'No')
+    ('y', 'Yes'),
+    ('n', 'No')
     )
 US_STATE_CHOICES = tuple(us_states)
 COUNTRY_CHOICES = tuple(countries)
@@ -85,16 +86,16 @@ class Profile(models.Model):
     first_name = models.CharField('First Name', max_length=64)
     middle_name = models.CharField('Middle Name', max_length=64)
     last_name = models.CharField('Last Name', max_length=64)
-    gender = models.CharField('Gender', max_length=6, choices=GENDER_CHOICES)
+    gender = models.CharField('Gender', max_length=1, choices=GENDER_CHOICES)
     date_of_birth = models.DateField('Date of Birth', null=True)
     residence_country = models.CharField('Residence - Country', max_length=64, choices=COUNTRY_CHOICES, null=True)
     foreign_currency_default = models.CharField('Foreign Currency Default', max_length=64, choices=CURRENCY_CHOICES, null=True)
-    other_coverage = models.CharField('Other health insurance coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
+    other_coverage = models.CharField('Other health insurance coverage?', max_length=1, choices=AFFIRM_CHOICES, null=True)
     other_insurance_co = models.CharField('Other health insurance provider', max_length=64, null=True, blank=True)
     other_plan_name = models.CharField('Other health plan name', max_length=64, null=True, blank=True)
     other_plan_id = models.CharField('Other health plan id', max_length=64, null=True, blank=True)
-    medicare_part_a = models.CharField('Medicare Part A coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
-    medicare_part_b = models.CharField('Medicare Part B coverage?', max_length=3, choices=AFFIRM_CHOICES, null=True)
+    medicare_part_a = models.CharField('Medicare Part A coverage?', max_length=1, choices=AFFIRM_CHOICES, null=True)
+    medicare_part_b = models.CharField('Medicare Part B coverage?', max_length=1, choices=AFFIRM_CHOICES, null=True)
     medicare_id = models.CharField('Medicare ID', max_length=64, null=True, blank=True)
     profile_slug = models.SlugField()
 
@@ -159,14 +160,14 @@ class InsuredProfile(Profile):
 
 class DependentProfile(Profile):
     RELATIONSHIP_CHOICES = (
-                                            ('spouse', 'Spouse'),
-                                            ('child', 'Child')
+                                            ('s', 'Spouse'),
+                                            ('c', 'Child')
                                             )
     # better related name would be dependent_profiles
-    insured = models.ForeignKey(User, on_delete=None, related_name='dependents')
+    insured = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dependents')
     #base_profile = models.OneToOneField(Profile, on_delete=None)
-    relationship_to_insured = models.CharField('Relationship to insured', max_length=6, choices=RELATIONSHIP_CHOICES)
-    full_time_student = models.CharField('Is dependent full-time student?', max_length=3, choices=AFFIRM_CHOICES)
+    relationship_to_insured = models.CharField('Relationship to insured', max_length=1, choices=RELATIONSHIP_CHOICES)
+    full_time_student = models.CharField('Is dependent full-time student?', max_length=1, choices=AFFIRM_CHOICES)
 
     @property
     def profile_complete(self):
@@ -188,7 +189,7 @@ class Report(models.Model):
     created = models.DateTimeField(editable=False)
     insured_profile = models.ForeignKey(InsuredProfile, on_delete=models.PROTECT, null=False, related_name='reports')
     dependent_profile = models.ForeignKey(DependentProfile, on_delete=models.PROTECT, null=True)
-    #submitted = models.BooleanField(default=False, null=False)
+    submitted = models.BooleanField(default=False, null=False)
     patient_slug = models.SlugField(unique=False)  
 
     
@@ -210,13 +211,13 @@ class Report(models.Model):
 
 class Claim(models.Model):
     CLAIM_TYPE_CHOICES = (
-                                            ('medical', 'Medical'),
-                                            ('dental', 'Dental'),
-                                            ('vision', 'Vision'),
-                                            ('hearing', 'Hearing'),
-                                            ('prescription', 'Prescription')
+                                            ('m', 'Medical'),
+                                            ('d', 'Dental'),
+                                            ('v', 'Vision'),
+                                            ('h', 'Hearing'),
+                                            ('p', 'Prescription')
                                             )
-    report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='claims')
+    report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='claims', blank=True)
     # tried to avoid repeating this in both Report and Claim - does it matter?
     insured_profile = models.OneToOneField(InsuredProfile, on_delete=models.PROTECT, null=False)
     dependent_profile = models.OneToOneField(DependentProfile, on_delete=models.PROTECT, null=True)
@@ -225,7 +226,7 @@ class Claim(models.Model):
     auto_accident_related = models.CharField('Due to auto accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)
     other_accident_related = models.CharField('Due to other accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)
     full_time_student = models.CharField('Was patient full-time student at time of service?', max_length=3, choices=AFFIRM_CHOICES)
-    claim_type = models.CharField('Claim Type', max_length=2, choices=CLAIM_TYPE_CHOICES)
+    claim_type = models.CharField('Claim Type', max_length=1, choices=CLAIM_TYPE_CHOICES)
     service_date = models.DateField('Date of Service', null=False)
     service_description = models.CharField('Description of Service', max_length=64, null=False)
     service_place = models.CharField('Place of Service', max_length=64, null=False)
@@ -237,6 +238,8 @@ class Claim(models.Model):
         """
         On save, populate full_time_student field
         """
+        reports = Report.objects.filter(submitted=False)
+        # for report in reports:
         if self.dependent_profile:
             self.full_time_student = self.dependent_profile.full_time_student
 

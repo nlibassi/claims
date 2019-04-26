@@ -12,7 +12,7 @@
 </form>
 {% else %}
 <p>Complete profile for {{ request.user.get_username }}.</p>
-<form method="POST" action="{% url 'update_profile_form' request.user.insuredprofile.pk %}">
+<form method="POST" action="{% url 'complete_profile_form' request.user.pk %}">
   {% csrf_token %}
   <table border="0">
       {{ form }}
