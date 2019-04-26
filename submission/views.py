@@ -225,21 +225,29 @@ class ClaimCreateView(CreateView):
     success_url = reverse_lazy('claim_list')
 
     # trying to pre-populate the form with this - should this be done in the form itself instead?
-    def get(self, request, *args, **kwargs):
+    def get(self, request, profile_slug, *args, **kwargs):
         form = self.form_class(initial=self.initial)
         form.foreign_currency = request.user.insuredprofile.foreign_currency_default
-        return render(request, self.template_name, {'form': form})
-        #return render(request, self.template_name, {'form': form, 'profile_slug': profile_slug})
+        #return render(request, self.template_name, {'form': form})
+        return render(request, self.template_name, {'form': form, 'profile_slug': profile_slug})
 
     # finish writing this
     def form_valid(self, form):
         form.instance.user = self.request.user
         claim = form.save(commit=False)
         claim.insured_profile = self.request.user.insuredprofile
+        # later change this to patient reports
+        #user_reports = Report.objects.filter(report__insured_profile__user=self.request.user)
+        #claim.report = [report for report in user_reports if not report.submitted][0]
         # dependent_profile should come from form used to create report
         #claim.dependent_profile = self.request. # what?
         claim.save()  # This is redundant, see comments. ??
         return super(ClaimCreateView, self).form_valid(form)
+
+    # cannot pass profile_slug to get_success_url() in this way
+    #def get_success_url(self, *args, **kwargs):
+        #return reverse_lazy('claim_list/' + self.request.profile_slug + '/')
+
 
     #success_url = reverse_lazy()
 
@@ -248,11 +256,14 @@ class ClaimListView(ListView):
     model = Claim
     template_name = 'claim_list.html'
 
-    def get(self, request, profile_slug, *args, **kwargs):
-        return render(request, self.template_name, {'profile_slug': profile_slug})
+    # cannot pass profile_slug to get()
+    def get(self, request, *args, **kwargs):
+        #return render(request, self.template_name, {'profile_slug': profile_slug})
+        return render(request, self.template_name)
 
     def get_queryset(self, profile_slug):
-        return Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
+        #return Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
+        return Claim.objects.filter(report__patient_slug=profile_slug)
 """
 class UpdateProfileForm(View):
     form_class = InsuredProfileForm

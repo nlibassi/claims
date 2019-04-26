@@ -239,6 +239,8 @@ class Claim(models.Model):
         On save, populate full_time_student field
         """
         reports = Report.objects.filter(submitted=False)
+        # fix this later
+        self.report = reports[0]
         # for report in reports:
         if self.dependent_profile:
             self.full_time_student = self.dependent_profile.full_time_student

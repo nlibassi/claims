@@ -3,9 +3,5 @@
 {% block title %}Claim List{% endblock %}
 
 {% block content %}
-<p>Test text</p>
-<p>Current claims on open report for {{ request.profile_slug }}:</p>
-{% for claim in request.user.insuredprofile.reports.claims.all %}
-<p> {{ claim }} </p>
-{% endfor %}
+<p>Claims for ...</p>
 {% endblock %}
