@@ -256,14 +256,29 @@ class ClaimListView(ListView):
     model = Claim
     template_name = 'claim_list.html'
 
+    """
+    def get_context_data(self, **kwargs):
+        context = super(ClaimListView, self).get_context_data(**kwargs)
+        #claims = Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
+        claims1 = Claim.objects.filter(report__submitted=False)
+        context.update({'claims1': claims1})
+        return context
+    """
+
     # cannot pass profile_slug to get()
     def get(self, request, *args, **kwargs):
         #return render(request, self.template_name, {'profile_slug': profile_slug})
-        return render(request, self.template_name)
+        #context = super(ClaimListView, self).get_context_data(**kwargs)
+        #claims = Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
+        claims1 = Claim.objects.filter(report__submitted=False)
+        #context.update({'claims1': claims1})
+        return render(request, self.template_name, {'claims1': claims1})
 
-    def get_queryset(self, profile_slug):
+    #def get_queryset(self, profile_slug):
         #return Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
-        return Claim.objects.filter(report__patient_slug=profile_slug)
+
+
+        #return Claim.objects.filter(report__patient_slug=profile_slug)
 """
 class UpdateProfileForm(View):
     form_class = InsuredProfileForm

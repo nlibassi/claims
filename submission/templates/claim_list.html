@@ -3,5 +3,8 @@
 {% block title %}Claim List{% endblock %}
 
 {% block content %}
-<p>Claims for ...</p>
+<p>Current claims on open report for...:</p>
+{% for claim in claims1 %}
+<p> {{ claim.service_description }} </p>
+{% endfor %}
 {% endblock %}
