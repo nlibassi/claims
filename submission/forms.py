@@ -1,8 +1,9 @@
 from django import forms
 from .models import InsuredProfile, DependentProfile, Profile, Claim
+import datetime
 
 class ProfileForm(forms.ModelForm):
-    date_of_birth = forms.DateField(widget=forms.SelectDateWidget)
+    date_of_birth = forms.DateField(widget=forms.SelectDateWidget(years=range(1900, datetime.datetime.now().year + 1)), initial = datetime.datetime.now().year - 50)
 
     class Meta:
         model = Profile
@@ -54,7 +55,8 @@ class DependentProfileForm(ProfileForm):
 
 
 class ClaimForm(forms.ModelForm):
-    service_date = forms.DateField(widget=forms.SelectDateWidget)
+    service_date = forms.DateField(widget=forms.SelectDateWidget(
+        years=range(datetime.datetime.now().year - 5, datetime.datetime.now().year + 1)))
 
     class Meta:
         model = Claim

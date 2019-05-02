@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<p>Complete claim form for {{ profile_slug }}:</p>
+<p>Complete claim form for {{ patient_first_last_name }}:</p>
 <form method="POST" action="{% url 'complete_claim_form' profile_slug %}">
   {% csrf_token %}
   <table border="0">

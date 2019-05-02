@@ -9,7 +9,7 @@ from django.views import generic
 from django.views.generic import View, CreateView, UpdateView, TemplateView, DetailView, ListView
 from django.utils import timezone
 # add other models by name later
-from .models import InsuredProfile, DependentProfile, Report, Claim
+from .models import InsuredProfile, DependentProfile, Report, Claim, Sales
 from .forms import InsuredProfileForm, DependentProfileForm, ClaimForm
 from .render import Render
 from django.contrib.auth.forms import UserCreationForm
@@ -180,7 +180,6 @@ class DependentProfileUpdateView(UpdateView):
 
 # turn this into CreateReportView - separate view where patient is chosen (single-field form?)
 class ReportCreatedView(View):
-    print('ReportCreatedView available')
     model = Report
     template_name = 'report_created.html'
     #http_method_names = ['get', 'post']
@@ -245,7 +244,8 @@ class ClaimCreateView(CreateView):
         form = self.form_class(initial=self.initial)
         form.foreign_currency = request.user.insuredprofile.foreign_currency_default
         #return render(request, self.template_name, {'form': form})
-        return render(request, self.template_name, {'form': form, 'profile_slug': profile_slug})
+        patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
+        return render(request, self.template_name, {'form': form, 'profile_slug': profile_slug, 'patient_first_last_name': patient_first_last_name})
 
     def get_context_data(self, *args, **kwargs):
         context = super(ClaimCreateView, self).get_context_data(*args, **kwargs)
@@ -300,7 +300,9 @@ class ClaimListView(ListView):
         report_patient_slug = last_updated_report.patient_slug
         report_first_last_name = profile_slug_to_first_last_name(report_patient_slug)
         #context.update({'claims1': claims1})
-        return render(request, self.template_name, {'report_claims': report_claims, 'report_first_last_name': report_first_last_name})
+        return render(request, self.template_name, {'report_claims': report_claims, 
+                                                                                'report_first_last_name': report_first_last_name, 
+                                                                                'profile_slug': report_patient_slug})
 
     #def get_queryset(self, profile_slug):
         #return Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
@@ -416,14 +418,21 @@ class InsuredProfileComplete(View):
 
 
 class Pdf(View):
+    template_name = 'pdf.html'
 
-    def get(self, request):
-        sales = Sales.objects.all()
+    def get(self, request, *args, **kwargs):
+        #sales = Sales.objects.all()
+        insureds_newest_claim = Claim.objects.filter(insured_profile=self.request.user.insuredprofile).order_by('-created')[0]
+        report = insureds_newest_claim.report
+        claims = Claim.objects.filter(report=report).filter(report__submitted=False)
+        report_patient_slug = report.patient_slug
+        report_first_last_name = profile_slug_to_first_last_name(report_patient_slug)
         today = timezone.now()
         params = {
+                'patient_name': report_first_last_name,
                 'today': today,
-                'sales': sales,
-                'request': request
+                'report': report,
+                'claims': claims
         }
         return Render.render('pdf.html', params)
         # no need for HttpResponse here as it is handled by the Render.render method

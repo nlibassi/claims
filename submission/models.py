@@ -17,6 +17,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 
 from django.core.exceptions import ValidationError
+
+from forex_python.converter import CurrencyRates
 # Create your models here.
 
 
@@ -241,6 +243,8 @@ class Claim(models.Model):
     service_place = models.CharField('Place of Service', max_length=64, null=False)
     foreign_charges = models.DecimalField('Foreign Charges', max_digits=18, decimal_places=2)
     foreign_currency = models.CharField('Foreign Currency Default', max_length=64, choices=CURRENCY_CHOICES, null=False)
+    exchange_rate = models.DecimalField('Exchange Rate', max_digits=30, decimal_places=10)
+    usd_charges = models.DecimalField('USD Charges', max_digits=18, decimal_places=2)
 
     # may not want to do this, and/or it may need to be done before saving - just want to show it in the form
     def save(self, *args, **kwargs):
@@ -255,6 +259,9 @@ class Claim(models.Model):
             self.created = timezone.now()
         if self.dependent_profile:
             self.full_time_student = self.dependent_profile.full_time_student
+        conversion = CurrencyRates()
+        self.exchange_rate = conversion.get_rate('USD', self.foreign_currency, self.service_date)
+        self.usd_charges = float(self.foreign_charges) / self.exchange_rate
 
         return super(Claim, self).save(*args, **kwargs)
 
