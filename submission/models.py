@@ -205,7 +205,7 @@ class Report(models.Model):
         """On save, create timestamp, populate patient_profile?"""
         if not self.id:
             self.created = timezone.now()
-            #print('report created at {}'.format(self.created))
+            print('report created at {}'.format(self.created))
         return super(Report, self).save(*args, **kwargs)
     
     class Meta:
@@ -225,6 +225,7 @@ class Claim(models.Model):
                                             ('h', 'Hearing'),
                                             ('p', 'Prescription')
                                             )
+    created = models.DateTimeField(editable=False)
     report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='claims', blank=True)
     # tried to avoid repeating this in both Report and Claim - does it matter?
     insured_profile = models.ForeignKey(InsuredProfile, on_delete=models.PROTECT, null=False)
@@ -250,6 +251,8 @@ class Claim(models.Model):
         # fix this later 
         #self.report = reports[0]
         # for report in reports:
+        if not self.id:
+            self.created = timezone.now()
         if self.dependent_profile:
             self.full_time_student = self.dependent_profile.full_time_student
 

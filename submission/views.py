@@ -294,9 +294,13 @@ class ClaimListView(ListView):
         #return render(request, self.template_name, {'profile_slug': profile_slug})
         #context = super(ClaimListView, self).get_context_data(**kwargs)
         #claims = Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
-        claims1 = Claim.objects.filter(report__submitted=False)
+        insureds_newest_claim = Claim.objects.filter(insured_profile=self.request.user.insuredprofile).order_by('-created')[0]
+        last_updated_report = insureds_newest_claim.report
+        report_claims = Claim.objects.filter(report=last_updated_report).filter(report__submitted=False)
+        report_patient_slug = last_updated_report.patient_slug
+        report_first_last_name = profile_slug_to_first_last_name(report_patient_slug)
         #context.update({'claims1': claims1})
-        return render(request, self.template_name, {'claims1': claims1})
+        return render(request, self.template_name, {'report_claims': report_claims, 'report_first_last_name': report_first_last_name})
 
     #def get_queryset(self, profile_slug):
         #return Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
