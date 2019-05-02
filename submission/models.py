@@ -227,8 +227,8 @@ class Claim(models.Model):
                                             )
     report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='claims', blank=True)
     # tried to avoid repeating this in both Report and Claim - does it matter?
-    insured_profile = models.OneToOneField(InsuredProfile, on_delete=models.PROTECT, null=False)
-    dependent_profile = models.OneToOneField(DependentProfile, on_delete=models.PROTECT, null=True)
+    insured_profile = models.ForeignKey(InsuredProfile, on_delete=models.PROTECT, null=False)
+    dependent_profile = models.ForeignKey(DependentProfile, on_delete=models.PROTECT, null=True)
     diagnosis = models.CharField('Diagnosis', max_length=64, null=False)
     employment_related = models.CharField('Due to employment-related accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)
     auto_accident_related = models.CharField('Due to auto accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)

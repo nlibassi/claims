@@ -186,7 +186,7 @@ class ReportCreatedView(View):
     #http_method_names = ['get', 'post']
     
     # probably shouldn't be creating report in get() method but trying to 
-    # minimize user's clicks
+    # minimize user's clicks - but maybe should move report attribute population to post()
     def get(self, request, profile_slug):
         insured_profile = request.user.insuredprofile
         if validate_single_open_report(request, profile_slug):
@@ -195,6 +195,7 @@ class ReportCreatedView(View):
                 dependent_profiles = request.user.dependents.all()
                 for dependent_profile in dependent_profiles:
                     if dependent_profile.profile_slug == profile_slug:
+                        report.dependent_profile = dependent_profile
                         report.patient_slug = dependent_profile.profile_slug
             else:
                 report.patient_slug = profile_slug
