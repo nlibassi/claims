@@ -173,11 +173,6 @@ class DependentProfile(Profile):
 
     def save(self, *args, **kwargs):
         """ On save, populate created field with timestamp """
-        # prevent a given user's existing dependent profile from being created more than once
-        user_dependents = self.insured.dependents.all()
-        if user_dependents.filter(profile_slug=self.profile_slug).count() > 1:
-            # see what this looks like to user after debugging is off
-            raise ValidationError("Dependent profile already exists.")
         if not self.id:
             self.created = timezone.now()
         return super(DependentProfile, self).save(*args, **kwargs)

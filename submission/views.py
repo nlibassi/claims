@@ -41,6 +41,9 @@ def profile_slug_to_first_last_name(profile_slug):
     name_first_last_title = ' '.join(name_list)
     return name_first_last_title
 
+def first_last_name_to_profile_slug(first_name, last_name):
+    return first_name.lower() + '-' + last_name.lower()
+
 def validate_single_open_report(request, profile_slug):
     """
     validates that only one instance of an unsubmitted report exists per person
@@ -142,7 +145,11 @@ class DependentProfileCreateView(CreateView):
         #form.instance.insured = self.request.user
         profile = form.save(commit=False)
         profile.insured = self.request.user
-        profile.save()  # This is redundant, see comments. ??
+        user_dependents = self.request.user.dependents.all()
+        form_name_slug_form = first_last_name_to_profile_slug(profile.first_name, profile.last_name)
+        if user_dependents.filter(profile_slug=form_name_slug_form).exists():
+            raise ValidationError("Dependent profile already exists.")
+        profile.save()
         return super(DependentProfileCreateView, self).form_valid(form)
 
 
