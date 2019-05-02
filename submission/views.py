@@ -145,9 +145,17 @@ class DependentProfileCreateView(CreateView):
         profile.save()  # This is redundant, see comments. ??
         return super(DependentProfileCreateView, self).form_valid(form)
 
-# not using
+
 class DependentProfileCompleteView(TemplateView):
     template_name = 'dependent_profile_complete.html'
+
+    def get(self, request, *args, **kwargs):
+        # get user's dependents, then get newest dependent?
+        insureds_newest_dependent_profile = self.request.user.dependents.filter().order_by('-created')[0]
+        insureds_newest_dependent_first_name = insureds_newest_dependent_profile.first_name
+        # look at admin_order_field attribute - requires adding method to Model class then setting with
+        # method_name.admin_order_field
+        return render(request, self.template_name, context={'insureds_newest_dependent_first_name' : insureds_newest_dependent_first_name})
     
 
 class DependentProfileUpdateView(UpdateView):

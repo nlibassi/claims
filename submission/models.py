@@ -15,8 +15,9 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from django.template.defaultfilters import slugify
-# Create your models here.
 
+from django.core.exceptions import ValidationError
+# Create your models here.
 
 
 class Products(models.Model):
@@ -163,11 +164,23 @@ class DependentProfile(Profile):
                                             ('s', 'Spouse'),
                                             ('c', 'Child')
                                             )
+    created = models.DateTimeField(editable=False)
     # better related name would be dependent_profiles
     insured = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dependents')
     #base_profile = models.OneToOneField(Profile, on_delete=None)
     relationship_to_insured = models.CharField('Relationship to insured', max_length=1, choices=RELATIONSHIP_CHOICES)
     full_time_student = models.CharField('Is dependent full-time student?', max_length=1, choices=AFFIRM_CHOICES)
+
+    def save(self, *args, **kwargs):
+        """ On save, populate created field with timestamp """
+        # prevent a given user's existing dependent profile from being created more than once
+        user_dependents = self.insured.dependents.all()
+        if user_dependents.filter(profile_slug=self.profile_slug).count() > 1:
+            # see what this looks like to user after debugging is off
+            raise ValidationError("Dependent profile already exists.")
+        if not self.id:
+            self.created = timezone.now()
+        return super(DependentProfile, self).save(*args, **kwargs)
 
     @property
     def profile_complete(self):
@@ -197,7 +210,7 @@ class Report(models.Model):
         """On save, create timestamp, populate patient_profile?"""
         if not self.id:
             self.created = timezone.now()
-            print('report created at {}'.format(self.created))
+            #print('report created at {}'.format(self.created))
         return super(Report, self).save(*args, **kwargs)
     
     class Meta:
@@ -239,7 +252,7 @@ class Claim(models.Model):
         On save, populate full_time_student field
         """
         #reports = Report.objects.filter(submitted=False)
-        # fix this later
+        # fix this later 
         #self.report = reports[0]
         # for report in reports:
         if self.dependent_profile:
