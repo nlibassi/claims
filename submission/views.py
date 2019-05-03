@@ -28,7 +28,7 @@ from django.forms import ModelForm
 from django.core.exceptions import ValidationError
 
 
-#from easy_pdf.views import PDFTemplateView
+# helper functions
 
 def profile_slug_to_first_last_name(profile_slug):
     """
@@ -38,11 +38,24 @@ def profile_slug_to_first_last_name(profile_slug):
     """
     name_list = profile_slug.split('-')
     name_list = [name.title() for name in name_list]
-    name_first_last_title = ' '.join(name_list)
-    return name_first_last_title
+    first_last_name_title = ' '.join(name_list)
+    return first_last_name_title
+
+
+def profile_slug_to_first_name(profile_slug):
+    """
+    convert profile slug to first name in title case
+    arg: profile slug as string e.g. 'bob-smith'
+    ret: title case version of name as string e.g. 'Bob'
+    """
+    first_name = profile_slug.split('-')[0]
+    first_name_title = first_name.title()
+    return first_name_title
+
 
 def first_last_name_to_profile_slug(first_name, last_name):
     return first_name.lower() + '-' + last_name.lower()
+
 
 def validate_single_open_report(request, profile_slug):
     """
@@ -59,9 +72,8 @@ def validate_single_open_report(request, profile_slug):
         return True
 
 
-# Create your views here.
+# Views
 
-# is CreateView in django.views.generic or django.views.generic.edit?
 class SignUp(CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy('login')
@@ -78,6 +90,17 @@ class SignUp(CreateView):
 class Welcome(TemplateView):
     #success_url = reverse_lazy('welcome')
     template_name = 'welcome.html'
+
+    def get(self, request, *args, **kwargs):
+        user_reports = self.request.user.insuredprofile.reports.all()
+        open_user_reports = user_reports.filter(submitted=False)
+        open_user_reports_patient_slugs = [open_user_report.patient_slug for open_user_report in open_user_reports]
+        open_user_reports_first_names = [profile_slug_to_first_name(open_user_reports_patient_slug) \
+                                                             for open_user_reports_patient_slug in open_user_reports_patient_slugs]
+        context = {'open_user_reports_patient_slugs': open_user_reports_patient_slugs,
+                            'open_user_reports_first_names' : open_user_reports_first_names
+                        }
+        return render(request, self.template_name, context=context)
 
     # get() method not required with TemplateView
     """
@@ -237,9 +260,17 @@ class ReportCreatedView(View):
 class ClaimCreateView(CreateView):
     form_class = ClaimForm
     template_name = 'claim_form.html'
-    success_url = reverse_lazy('claim_list')
+    #context = get_context_data(self)
+    #success_url = reverse_lazy('claim_list', kwargs={'profile_slug': profile_slug})
 
+    def get_success_url(self, **kwargs):
+        #context = get_context_data()
+        profile_slug = self.kwargs['profile_slug']
+        return reverse_lazy('claim_list', kwargs={'profile_slug': profile_slug})
+    
     # trying to pre-populate the form with this - should this be done in the form itself instead?
+    # COME BACK AND DO PRE-POPULATION OF FORM HERE OR ELSEWHERE
+    
     def get(self, request, profile_slug, *args, **kwargs):
         form = self.form_class(initial=self.initial)
         form.foreign_currency = request.user.insuredprofile.foreign_currency_default
@@ -247,9 +278,12 @@ class ClaimCreateView(CreateView):
         patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
         return render(request, self.template_name, {'form': form, 'profile_slug': profile_slug, 'patient_first_last_name': patient_first_last_name})
 
+
     def get_context_data(self, *args, **kwargs):
-        context = super(ClaimCreateView, self).get_context_data(*args, **kwargs)
-        context['profile_slug'] = self.kwargs['profile_slug']
+        #context = super(ClaimCreateView, self).get_context_data(*args, **kwargs)
+        profile_slug = self.kwargs['profile_slug']
+        patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
+        context = {'profile_slug': profile_slug, 'patient_first_last_name': patient_first_last_name}
         return context
 
     # profile_slug cannot be passed as arg here
@@ -260,6 +294,8 @@ class ClaimCreateView(CreateView):
         claim.insured_profile = self.request.user.insuredprofile
         context = self.get_context_data()
         claim.report = Report.objects.filter(patient_slug=context['profile_slug']).get(submitted=False)
+        # still may need to avoid defining profiles on both report and claims but doing this for now
+        claim.dependent_profile = claim.report.dependent_profile
         # later change this to patient reports
         #user_reports = Report.objects.filter(report__insured_profile__user=self.request.user)
         #claim.report = [report for report in user_reports if not report.submitted][0]
@@ -272,7 +308,7 @@ class ClaimCreateView(CreateView):
     #def get_success_url(self, *args, **kwargs):
         #return reverse_lazy('claim_list/' + self.request.profile_slug + '/')
 
-
+    
     #success_url = reverse_lazy()
 
 
@@ -289,20 +325,15 @@ class ClaimListView(ListView):
         return context
     """
 
-    # cannot pass profile_slug to get()
     def get(self, request, *args, **kwargs):
-        #return render(request, self.template_name, {'profile_slug': profile_slug})
-        #context = super(ClaimListView, self).get_context_data(**kwargs)
-        #claims = Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
-        insureds_newest_claim = Claim.objects.filter(insured_profile=self.request.user.insuredprofile).order_by('-created')[0]
-        last_updated_report = insureds_newest_claim.report
-        report_claims = Claim.objects.filter(report=last_updated_report).filter(report__submitted=False)
-        report_patient_slug = last_updated_report.patient_slug
-        report_first_last_name = profile_slug_to_first_last_name(report_patient_slug)
-        #context.update({'claims1': claims1})
-        return render(request, self.template_name, {'report_claims': report_claims, 
-                                                                                'report_first_last_name': report_first_last_name, 
-                                                                                'profile_slug': report_patient_slug})
+        profile_slug = self.kwargs['profile_slug']
+        report_first_last_name = profile_slug_to_first_last_name(profile_slug)
+        report = Report.objects.filter(patient_slug=profile_slug).filter(submitted=False)
+        report_claims = Claim.objects.filter(report=report)
+        context = {'profile_slug': profile_slug, 
+                            'report_first_last_name': report_first_last_name, 
+                            'report_claims': report_claims}
+        return render(request, self.template_name, context=context)
 
     #def get_queryset(self, profile_slug):
         #return Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
@@ -422,11 +453,10 @@ class Pdf(View):
 
     def get(self, request, *args, **kwargs):
         #sales = Sales.objects.all()
-        insureds_newest_claim = Claim.objects.filter(insured_profile=self.request.user.insuredprofile).order_by('-created')[0]
-        report = insureds_newest_claim.report
+        profile_slug = self.kwargs['profile_slug']
+        report = Report.objects.filter(patient_slug=profile_slug)
         claims = Claim.objects.filter(report=report).filter(report__submitted=False)
-        report_patient_slug = report.patient_slug
-        report_first_last_name = profile_slug_to_first_last_name(report_patient_slug)
+        report_first_last_name = profile_slug_to_first_last_name(profile_slug)
         today = timezone.now()
         params = {
                 'patient_name': report_first_last_name,
