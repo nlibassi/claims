@@ -70,12 +70,12 @@ class User(AbstractUser):
 """
 
 GENDER_CHOICES = (
-('m', 'Male'),
-('f', 'Female')
+('M', 'Male'),
+('F', 'Female')
 )
 AFFIRM_CHOICES = (
-    ('y', 'Yes'),
-    ('n', 'No')
+    ('Y', 'Yes'),
+    ('N', 'No')
     )
 US_STATE_CHOICES = tuple(us_states)
 COUNTRY_CHOICES = tuple(countries)
@@ -84,12 +84,22 @@ CURRENCY_CHOICES = tuple(currencies)
 
 # fields shared by both InsuredProfile and DependentProfile
 class Profile(models.Model):
+    RELATIONSHIP_CHOICES = (
+                                            ('Spouse', 'Spouse'),
+                                            ('Child', 'Child'),
+                                            ('Self', 'Self')
+                                            )
+    DEPENDENT_RELATIONSHIP_CHOICES = (
+                                            ('Spouse', 'Spouse'),
+                                            ('Child', 'Child'),
+                                            )
     # this field may need to be taken care of in save() method
     last_modified = models.DateTimeField(default=datetime.utcnow)
     first_name = models.CharField('First Name', max_length=64)
     middle_name = models.CharField('Middle Name', max_length=64)
     last_name = models.CharField('Last Name', max_length=64)
     gender = models.CharField('Gender', max_length=1, choices=GENDER_CHOICES)
+    relationship_to_insured = models.CharField('Relationship to insured', max_length=5, choices=RELATIONSHIP_CHOICES)
     date_of_birth = models.DateField('Date of Birth', null=True)
     residence_country = models.CharField('Residence - Country', max_length=64, choices=COUNTRY_CHOICES, null=True)
     foreign_currency_default = models.CharField('Foreign Currency Default', max_length=64, choices=CURRENCY_CHOICES, null=True)
@@ -147,30 +157,28 @@ class InsuredProfile(Profile):
         user = kwargs["instance"]
         if kwargs["created"]:
             insured_profile = InsuredProfile(user=user)
+            insured_profile.relationship_to_insured = 'Self'
             insured_profile.save()
         
     post_save.connect(create_profile, sender=User)
-    
+
+
     @property
     def profile_complete(self):
-        required_fields = [self.user, self.email, self.first_name, self.last_name, self.gender, self.date_of_birth, self.air_id,
-        self.mailing_street, self.mailing_city, self.mailing_state, self.mailing_zip, self.residence_country,
-        self.foreign_currency_default, self.other_coverage, self.medicare_part_a, self.medicare_part_b, 
-        self.has_dependent]
+        required_fields = [self.user, self.email, self.first_name, self.last_name, self.gender, self.date_of_birth, 
+        self.relationship_to_insured, self.air_id, self.mailing_street, self.mailing_city, self.mailing_state, 
+        self.mailing_zip, self.residence_country, self.foreign_currency_default, self.other_coverage, 
+        self.medicare_part_a, self.medicare_part_b, self.has_dependent]
         if all(required_fields):
             return True
 
 
 class DependentProfile(Profile):
-    RELATIONSHIP_CHOICES = (
-                                            ('s', 'Spouse'),
-                                            ('c', 'Child')
-                                            )
+    
     created = models.DateTimeField(editable=False)
     # better related name would be dependent_profiles
     insured = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dependents')
     #base_profile = models.OneToOneField(Profile, on_delete=None)
-    relationship_to_insured = models.CharField('Relationship to insured', max_length=1, choices=RELATIONSHIP_CHOICES)
     full_time_student = models.CharField('Is dependent full-time student?', max_length=1, choices=AFFIRM_CHOICES)
 
     def save(self, *args, **kwargs):
@@ -221,11 +229,11 @@ class Report(models.Model):
 
 class Claim(models.Model):
     CLAIM_TYPE_CHOICES = (
-                                            ('m', 'Medical'),
-                                            ('d', 'Dental'),
-                                            ('v', 'Vision'),
-                                            ('h', 'Hearing'),
-                                            ('p', 'Prescription')
+                                            ('M', 'Medical'),
+                                            ('D', 'Dental'),
+                                            ('V', 'Vision'),
+                                            ('H', 'Hearing'),
+                                            ('Rx', 'Prescription')
                                             )
     created = models.DateTimeField(editable=False)
     report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='claims', blank=True)
@@ -237,7 +245,7 @@ class Claim(models.Model):
     auto_accident_related = models.CharField('Due to auto accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)
     other_accident_related = models.CharField('Due to other accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)
     full_time_student = models.CharField('Was patient full-time student at time of service?', max_length=3, choices=AFFIRM_CHOICES)
-    claim_type = models.CharField('Claim Type', max_length=1, choices=CLAIM_TYPE_CHOICES)
+    claim_type = models.CharField('Claim Type', max_length=2, choices=CLAIM_TYPE_CHOICES)
     service_date = models.DateField('Date of Service', null=False)
     service_description = models.CharField('Description of Service', max_length=64, null=False)
     service_place = models.CharField('Place of Service', max_length=64, null=False)

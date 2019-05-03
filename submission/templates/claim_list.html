@@ -7,6 +7,7 @@
 {% for claim in report_claims %}
 <p> {{ claim.service_description }} </p>
 {% endfor %}
-
+<a href="{% url 'complete_claim_form' profile_slug %}">Add Claim</a>
+<br />
 <a href="{% url 'pdf_report' profile_slug %}">View Report Details</a>
 {% endblock %}

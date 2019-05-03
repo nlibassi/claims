@@ -47,6 +47,14 @@ class DependentProfileForm(ProfileForm):
                 'description': forms.Textarea(),
         }
 
+    # not sure why choices are not being limited here? seems to be doing nothing
+    def __init__(self, *args, **kwargs):
+        super(DependentProfileForm,self).__init__(*args,**kwargs)
+        choices = (('Spouse', 'Spouse'),
+                        ('Child', 'Child'))
+        self.fields['relationship_to_insured'].choices = choices
+
+
     def save(self, commit=True):
         profile = super(DependentProfileForm, self).save(commit=commit)
         return profile

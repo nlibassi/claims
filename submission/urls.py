@@ -35,7 +35,7 @@ urlpatterns = [
     url(r'^signup/$', views.SignUp.as_view(), name='register'),
     #url(r'^update_profile/$', views.update_profile_form, name='update_profile_form'),
     #url(r'^complete_profile/(?P<username>[\w.@+-]+)/$', views.InsuredProfileUpdateView.as_view(template_name='insuredprofile_form.html'), name='complete_profile_form'),
-    url(r'^complete_profile/(?P<pk>\d+)/$', views.InsuredProfileCreateView.as_view(template_name='insuredprofile_form.html'), name='complete_profile_form'),
+    url(r'^complete_profile/(?P<pk>\d+)/$', views.InsuredProfileUpdateView.as_view(template_name='insuredprofile_form.html'), name='complete_profile_form'),
     #url(r'^complete_profile/(?P<user>\w+)/$', views.InsuredProfileCreateView.as_view(template_name='insuredprofile_form.html'), name='complete_insured_profile_form'),
     #url(r'^$', views.InsuredProfileCreateView.as_view(template_name='insuredprofile_form.html'), name='complete_insured_profile_form'),
     url(r'^complete_dependent_profile/$', views.DependentProfileCreateView.as_view(template_name='dependentprofile_form.html'), name='complete_dependent_profile_form'),

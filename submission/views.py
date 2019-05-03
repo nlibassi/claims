@@ -119,14 +119,13 @@ class InsuredProfileCreateView(CreateView):
     model = InsuredProfile
     success_url = reverse_lazy('profile_updated')
 
-    
     # is this necessary? yes, overriding default form_valid() method so profile gets
     # saved under current user
     def form_valid(self, form):
         form.instance.user = self.request.user
         profile = form.save(commit=False)
         profile.user = self.request.user
-        profile.save()  # This is redundant, see comments. ??
+        profile.save()
         return super(InsuredProfileCreateView, self).form_valid(form)
 
     """
@@ -146,7 +145,7 @@ class InsuredProfileUpdateView(UpdateView):
         form.instance.user = self.request.user
         profile = form.save(commit=False)
         profile.user = self.request.user
-        profile.save()  # This is redundant, see comments. ??
+        #profile.save()  # This is redundant, see comments. ??
         return super(InsuredProfileUpdateView, self).form_valid(form)
 
     """
@@ -259,7 +258,7 @@ class ReportCreatedView(View):
 
 class ClaimCreateView(CreateView):
     form_class = ClaimForm
-    template_name = 'claim_form.html'
+    template_name = 'complete_claim_form'
     #context = get_context_data(self)
     #success_url = reverse_lazy('claim_list', kwargs={'profile_slug': profile_slug})
 
@@ -454,15 +453,26 @@ class Pdf(View):
     def get(self, request, *args, **kwargs):
         #sales = Sales.objects.all()
         profile_slug = self.kwargs['profile_slug']
-        report = Report.objects.filter(patient_slug=profile_slug)
-        claims = Claim.objects.filter(report=report).filter(report__submitted=False)
+        report = Report.objects.filter(submitted=False).get(patient_slug=profile_slug)
+        claims = Claim.objects.filter(report=report)
         report_first_last_name = profile_slug_to_first_last_name(profile_slug)
         today = timezone.now()
+        claims_usd_list = [claim.usd_charges for claim in claims]
+        total_claims_usd = sum(claims_usd_list)
+
+        insured_profile = report.insured_profile
+        if  report.dependent_profile:
+            patient_profile = report.dependent_profile
+        else:
+            patient_profile = insured_profile
         params = {
                 'patient_name': report_first_last_name,
                 'today': today,
                 'report': report,
-                'claims': claims
+                'claims': claims,
+                'insured_profile': insured_profile,
+                'patient_profile': patient_profile,
+                'total_claims_usd': total_claims_usd,
         }
         return Render.render('pdf.html', params)
         # no need for HttpResponse here as it is handled by the Render.render method

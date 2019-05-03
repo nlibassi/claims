@@ -52,14 +52,83 @@
 <div class="container">
     <div class="card">
         <div class="card-header">
-            <h3>Claim Report - {{ today | date:"m/d/Y" }}</h3>
+            <h3>Claim Report</h3>
         </div>
 
         <div class="list-group">
-            <p>Name: {{ patient_name }}</p>
+            <h3>Patient Name: {{ patient_name }}</h3>
         </div>
 
         <table class="table">
+            <th>Employee Information</th>
+            <thead>
+            <tr>
+                <th>First</th>
+                <th>Middle</th>
+                <th>Last</th>
+                <th>ID</th>
+                <th>Street</th>
+                <th>Address Overflow</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Zip</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ insured_profile.first_name }}</td>
+                    <td>{{ insured_profile.middle_name }}</td>
+                    <td>{{ insured_profile.last_name }}</td>
+                    <td>{{ insured_profile.air_id }}</td>
+                    <td>{{ insured_profile.mailing_street }}</td>
+                    <td>{{ insured_profile.mailing_optional }}</td>
+                    <td>{{ insured_profile.mailing_city }}</td>
+                    <td>{{ insured_profile.mailing_state }}</td>
+                    <td>{{ insured_profile.mailing_zip }}</td> 
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="table">
+            <th>Patient Information</th>
+            <thead>
+            <tr>
+                <th>First</th>
+                <th>Middle</th>
+                <th>Last</th>
+                <th>DOB</th>
+                <th>Gender</th>
+                <th>Relationship to Insured</th>
+                <th>Other Coverage?</th>
+                <th>Other Provider</th>
+                <th>Other Plan</th>
+                <th>Other Plan ID</th>
+                <th>Medicare A</th>
+                <th>Medicare B</th>
+                <th>Medicare ID</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ patient_profile.first_name }}</td>
+                    <td>{{ patient_profile.middle_name }}</td>
+                    <td>{{ patient_profile.last_name }}</td>
+                    <td>{{ patient_profile.date_of_birth }}</td>
+                    <td>{{ patient_profile.gender }}</td>
+                    <td>{{ patient_profile.relationship_to_insured }}</td>
+                    <td>{{ patient_profile.other_coverage }}</td>
+                    <td>{{ patient_profile.other_insurance_co }}</td>
+                    <td>{{ patient_profile.other_plan_name }}</td>
+                    <td>{{ patient_profile.other_plan_id }}</td>
+                    <td>{{ patient_profile.medicare_part_a }}</td>
+                    <td>{{ patient_profile.medicare_part_b }}</td>
+                    <td>{{ patient_profile.medicare_id }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="table">
+            <th>Claims</th>
             <thead>
             <tr>
                 <th>Diag</th>
@@ -67,7 +136,7 @@
                 <th>Auto acc</th>
                 <th>Other acc</th>
                 <th>Full-time student</th>
-                <th>Type</th>
+                <th>Claim Type</th>
                 <th>Date</th>
                 <th>Desc</th>
                 <th>Place</th>
@@ -95,6 +164,9 @@
             {% endfor %}
             </tbody>
         </table>
+        <h3>Total USD: {{ total_claims_usd }}</h3>
+        <p>Signature: {{ insured_profile.first_name }} {{insured_profile.last_name}} </p>
+        <p>Date: {{ today | date:"m/d/Y" }}</p>
     </div>
 </div>
 
