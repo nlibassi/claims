@@ -250,7 +250,7 @@ class Claim(models.Model):
     service_description = models.CharField('Description of Service', max_length=64, null=False)
     service_place = models.CharField('Place of Service', max_length=64, null=False)
     foreign_charges = models.DecimalField('Foreign Charges', max_digits=18, decimal_places=2)
-    foreign_currency = models.CharField('Foreign Currency Default', max_length=64, choices=CURRENCY_CHOICES, null=False)
+    foreign_currency = models.CharField('Foreign Currency', max_length=64, choices=CURRENCY_CHOICES, null=False)
     exchange_rate = models.DecimalField('Exchange Rate', max_digits=30, decimal_places=10)
     usd_charges = models.DecimalField('USD Charges', max_digits=18, decimal_places=2)
 

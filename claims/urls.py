@@ -18,7 +18,8 @@ from django.contrib import admin
 
 from submission.views import Pdf
 
-urlpatterns = [url(r'^admin/', admin.site.urls),
+# change admin to something else to keep users out of admin
+urlpatterns = [url(r'^admin/', include(admin.site.urls)),
     url(r'^render/pdf/', Pdf.as_view()),
     url(r'^', include('submission.urls')),
 ]

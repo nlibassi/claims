@@ -4,8 +4,10 @@
 
 {% block content %}
 <p>Current claims on open report for {{ report_first_last_name }}:</p>
-{% for claim in report_claims %}
-<p> {{ claim.service_description }} </p>
+    {% for claim in report_claims %}
+    <p> {{ claim.service_description }} <a href="{% url 'delete_claim' claim.pk %}">Delete</a></p>
+    
+    <br />
 {% endfor %}
 <a href="{% url 'complete_claim_form' profile_slug %}">Add Claim</a>
 <br />

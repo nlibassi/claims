@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Delete Claim{% endblock %}
+
+{% block content %}
+Are you sure you want to delete this claim?
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Yes, I'm sure.</button>
+  <a href="javascript:history.back()">No, go back</a>
+</form>
+{% endblock %}
+
+

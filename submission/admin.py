@@ -17,6 +17,8 @@ class ClaimAdmin(admin.ModelAdmin):
 
 class UserAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
+
+admin.site.site_url = None
 # Register your models here.
 
 admin.site.register(Sales)

@@ -6,7 +6,9 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 #from django.views import generic
 
 from django.views import generic
-from django.views.generic import View, CreateView, UpdateView, TemplateView, DetailView, ListView
+# arent' some of these in generic.edit?
+from django.views.generic import View, TemplateView, DetailView, ListView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.utils import timezone
 # add other models by name later
 from .models import InsuredProfile, DependentProfile, Report, Claim, Sales
@@ -71,8 +73,19 @@ def validate_single_open_report(request, profile_slug):
     else:
         return True
 
+# Views - FBVs
 
-# Views
+"""
+# not using DeleteView CBV as no need to show a confirmation view/template after deletion
+def delete_claim(request, pk):
+    claim = Claim.objects.get(pk=pk) #get_object_or_404(Claim, pk=pk)
+    claim.delete()
+    # would prefer to return to 'claim_list' here - use redirect?
+    return HttpResponseRedirect('claim_list')
+    #return reverse_lazy('delete_claim')
+"""
+
+# Views - CBVs
 
 class SignUp(CreateView):
     form_class = UserCreationForm
@@ -110,30 +123,6 @@ class Welcome(TemplateView):
     """
 
 # add login_required decorator to class or function
-
-class InsuredProfileCreateView(CreateView):
-    form_class = InsuredProfileForm
-    # if template name is given in urls shouldn't be necessary here
-    template_name = 'insuredprofile_form.html'
-    # may not need to define model here as it is defined in InsuredProfileForm
-    model = InsuredProfile
-    success_url = reverse_lazy('profile_updated')
-
-    # is this necessary? yes, overriding default form_valid() method so profile gets
-    # saved under current user
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        profile = form.save(commit=False)
-        profile.user = self.request.user
-        profile.save()
-        return super(InsuredProfileCreateView, self).form_valid(form)
-
-    """
-    def get_success_url(self, request):
-        #pk = request.user.pk
-        return reverse_lazy('profile_updated', kwargs={'pk': request.session['user_id']})
-        #return reverse_lazy('profile_updated', kwargs={'pk': pk})
-    """
 
 class InsuredProfileUpdateView(UpdateView):
     form_class = InsuredProfileForm
@@ -271,8 +260,8 @@ class ClaimCreateView(CreateView):
     # COME BACK AND DO PRE-POPULATION OF FORM HERE OR ELSEWHERE
     
     def get(self, request, profile_slug, *args, **kwargs):
-        form = self.form_class(initial=self.initial)
-        form.foreign_currency = request.user.insuredprofile.foreign_currency_default
+        #form = self.form_class(initial=self.initial)
+        form = self.form_class(initial={'foreign_currency': request.user.insuredprofile.foreign_currency_default})
         #return render(request, self.template_name, {'form': form})
         patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
         return render(request, self.template_name, {'form': form, 'profile_slug': profile_slug, 'patient_first_last_name': patient_first_last_name})
@@ -313,7 +302,7 @@ class ClaimCreateView(CreateView):
 
 class ClaimListView(ListView):
     model = Claim
-    template_name = 'claim_list.html'
+    template_name = 'claim_list'
 
     """
     def get_context_data(self, **kwargs):
@@ -337,6 +326,26 @@ class ClaimListView(ListView):
     #def get_queryset(self, profile_slug):
         #return Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
 
+class ClaimDeleteView(DeleteView):
+    model = Claim
+    #success_url = reverse_lazy('claim_list')
+
+    template_name = 'delete_claim.html'
+
+    def get_success_url(self, **kwargs):
+        claim_pk = self.kwargs['pk']
+        claim = Claim.objects.get(pk=claim_pk)
+        profile_slug = claim.report.patient_slug
+        #profile_slug = self.request.pk.report.patient_slug
+        #profile_slug = self.kwargs['profile_slug']
+        return reverse_lazy('claim_list', kwargs={'profile_slug': profile_slug})
+
+    # cannot have url with pk as once object is deleted pk no longer exists
+    """
+    def get_success_url(self, **kwargs):
+        claim_pk = self.kwargs['pk']
+        return reverse_lazy('claim_deleted', kwargs={'pk': claim_pk})
+    """
 
         #return Claim.objects.filter(report__patient_slug=profile_slug)
 """

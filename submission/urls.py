@@ -50,6 +50,8 @@ urlpatterns = [
     #url(r'^file_claim_report/$', TemplateView.as_view(template_name='file_claim_report.html'), name='file_claim_report'),
     url(r'^report_created/(?P<profile_slug>[-\w]+)/$', views.ReportCreatedView.as_view(template_name='report_created.html'), name='report_created'),
     url(r'^claim_list/(?P<profile_slug>[-\w]+)/$', views.ClaimListView.as_view(template_name='claim_list.html'), name='claim_list'),
+    #url(r'^delete_claim/$', views.delete_claim, name='delete_claim'),
+    url(r'^delete_claim/(?P<pk>\d+)/$', views.ClaimDeleteView.as_view(), name='delete_claim'),
     url(r'^report_details/(?P<profile_slug>[-\w]+)/$', views.Pdf.as_view(template_name='pdf.html'), name='pdf_report'),
     url(r'^$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
     ]
