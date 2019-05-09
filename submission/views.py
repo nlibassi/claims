@@ -261,7 +261,13 @@ class ClaimCreateView(CreateView):
     
     def get(self, request, profile_slug, *args, **kwargs):
         #form = self.form_class(initial=self.initial)
-        form = self.form_class(initial={'foreign_currency': request.user.insuredprofile.foreign_currency_default})
+        if profile_slug != self.request.user.insuredprofile.profile_slug:
+            report = Report.objects.filter(submitted=False).get(patient_slug=profile_slug)
+            dependent_profile = report.dependent_profile
+            form = self.form_class(initial={'foreign_currency': request.user.insuredprofile.foreign_currency_default,
+                                                        'full_time_student': dependent_profile.full_time_student})
+        else:
+            form = self.form_class(initial={'foreign_currency': request.user.insuredprofile.foreign_currency_default})
         #return render(request, self.template_name, {'form': form})
         patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
         return render(request, self.template_name, {'form': form, 'profile_slug': profile_slug, 'patient_first_last_name': patient_first_last_name})
