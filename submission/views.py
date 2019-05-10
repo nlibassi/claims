@@ -549,6 +549,7 @@ class Pdf(View):
                 'insured_profile': insured_profile,
                 'patient_profile': patient_profile,
                 'total_claims_usd': total_claims_usd,
+                'request': request,
         }
         return Render.render('pdf.html', params)
         # no need for HttpResponse here as it is handled by the Render.render method
