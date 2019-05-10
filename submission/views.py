@@ -124,6 +124,8 @@ class Welcome(TemplateView):
 
 # add login_required decorator to class or function
 
+# no InsuredProfileCreateView anymore as it is created upon user creation and updated thereafter
+
 class InsuredProfileUpdateView(UpdateView):
     form_class = InsuredProfileForm
     # may not need to define model here as it is defined in InsuredProfileForm
@@ -134,7 +136,7 @@ class InsuredProfileUpdateView(UpdateView):
         form.instance.user = self.request.user
         profile = form.save(commit=False)
         profile.user = self.request.user
-        #profile.save()  # This is redundant, see comments. ??
+        profile.save()
         return super(InsuredProfileUpdateView, self).form_valid(form)
 
     """
@@ -179,14 +181,37 @@ class DependentProfileCompleteView(TemplateView):
 class DependentProfileUpdateView(UpdateView):
     form_class = DependentProfileForm
     model = DependentProfile
+    # template name is defined in url - this is probably unnecessary
+    template_name = 'dependentform_profile_update.html'
 
     #def get_queryset(self, request):
         #return super().get_queryset().filter(board=self.kwargs['board_id'])
 
-    def get_success_url(self, request):
+    def get_context_data(self, **kwargs):
+        dependent_profile_pk = self.kwargs['pk']
+        context = {'dependent_profile_pk': dependent_profile_pk}
+        return context
+
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        dependent_profile = DependentProfile.objects.get(pk=context['dependent_profile_pk'])
+        form = self.form_class(instance=dependent_profile)
+        context['form'] = form
+        return render(request, self.template_name, context)
+
+
+    def form_valid(self, form):
+        #form.instance.insured = self.request.user
+        profile = form.save(commit=False)
+        profile.save()
+        return super(DependentProfileUpdateView, self).form_valid(form)
+
+
+    def get_success_url(self):
         #pk = request.user.pk
-        return reverse_lazy('dependent_profile_updated', kwargs={'pk': request.session['user_id']})
-        #return reverse_lazy('profile_updated', kwargs={'pk': pk})
+        #return reverse_lazy('dependent_profile_updated', kwargs={'pk': request.session['user_id']})
+        return reverse_lazy('dependent_profile_updated')
 
 
 # turn this into CreateReportView - separate view where patient is chosen (single-field form?)
@@ -332,6 +357,40 @@ class ClaimListView(ListView):
     #def get_queryset(self, profile_slug):
         #return Claim.objects.filter(report__patient_slug=profile_slug).filter(report__submitted=False)
 
+class ClaimUpdateView(UpdateView):
+    form_class = ClaimForm
+    model = Claim
+    template_name = 'claim_form_update.html'
+
+    
+    def get_context_data(self, **kwargs):
+        claim_pk = self.kwargs['pk']
+        claim = Claim.objects.get(pk=claim_pk)
+        profile_slug = claim.report.patient_slug
+        patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
+        context = {'claim_pk': claim_pk, 'patient_first_last_name': patient_first_last_name, 'profile_slug': profile_slug}
+        return context
+
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        claim = Claim.objects.get(pk=context['claim_pk'])
+        form = self.form_class(instance=claim)
+        context['form'] = form
+        return render(request, self.template_name, context)
+
+
+    def form_valid(self, form):
+        claim = form.save(commit=False)
+        claim.save()
+        return super(ClaimUpdateView, self).form_valid(form)
+
+
+    def get_success_url(self):
+        profile_slug = self.get_context_data()['profile_slug']
+        return reverse_lazy('claim_list', kwargs={'profile_slug': profile_slug})
+
+
 class ClaimDeleteView(DeleteView):
     model = Claim
     #success_url = reverse_lazy('claim_list')
@@ -440,8 +499,7 @@ class InsuredProfileCreate(LoginRequiredMixin, generic.CreateView):
         return self.render_to_response(self.get_context_data(form=form))
 """
 
-class InsuredProfileUpdated(generic.TemplateView):
-    print('console test - InsuredProfileUpdated recognized')
+class InsuredProfileUpdated(TemplateView):
     template_name = 'profile_updated.html'
     #http_method_names = ['get']
 
@@ -460,6 +518,9 @@ class InsuredProfileComplete(View):
  
     #def post(self, request, *args, **kwargs):
 """
+
+class DependentProfileUpdated(TemplateView):
+    template_name = 'dependent_profile_updated.html'
 
 
 class Pdf(View):

@@ -1,0 +1,12 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<p>Update claim form for {{ patient_first_last_name }}:</p>
+<form method="POST" action="{% url 'update_claim' claim_pk %}">
+  {% csrf_token %}
+  <table border="0">
+      {{ form }}
+  </table>
+  <button type="submit">Submit</button>
+</form>
+{% endblock %}
