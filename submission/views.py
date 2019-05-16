@@ -474,10 +474,9 @@ class ReportSubmittedView(View):
         #except:
             #return "Attachment erorr"
         email.send()
-        #report.submitted = True
-        #return HttpResponseRedirect('report_submitted')
-        return render(request, 'report_submitted.html', {'profile_slug': profile_slug})
-        #return reverse_lazy('report_submitted.html', kwargs={'profile_slug': profile_slug})
+        report.submitted = True
+        report.save()
+        return render(request, 'report_submitted.html', {'profile_slug': profile_slug, 'report_first_last_name': report_first_last_name})
 
         # use threading after test
         #thread = Thread(target=email.send())
