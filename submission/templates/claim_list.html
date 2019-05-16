@@ -12,5 +12,7 @@
 {% endfor %}
 <a href="{% url 'complete_claim_form' profile_slug %}">Add Claim</a>
 <br />
-<a href="{% url 'pdf_report' profile_slug %}">View Report Details</a>
+<a href="{% url 'display_report' profile_slug %}">View Report Details</a>
+<br />
+<a href="{% url 'report_submitted' profile_slug %}">Submit Report</a>
 {% endblock %}

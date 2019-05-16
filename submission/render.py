@@ -12,12 +12,14 @@ class Render:
 
     @staticmethod
     def render(path: str, params: dict):
+        """ renders pdf to display for user """
         template = get_template(path)
         html = template.render(params)
         response = BytesIO()
-        file = open('my.file.pdf', 'wb')
-        pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), file)
-        file.close()
+        # is this file name a placeholder?
+        #file = open('my.file.pdf', 'wb')
+        pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), response)
+        #file.close()
         if not pdf.err:
             return HttpResponse(response.getvalue(), content_type='application/pdf')
         else:
@@ -29,9 +31,10 @@ class Render:
         template = get_template(path)
         html = template.render(params)
         patient_name = params['patient_name'].replace(' ', '_')
-        date = params['today'].replace('/', '-')
+        date = params['today'].strftime("%Y%m%d_%H-%M-%S")
         file_name = 'Claim_Report_{0}_{1}.pdf'.format(patient_name, date)
         file_path = os.path.join(os.path.abspath(os.path.dirname('__file__')), 'store', file_name)
         with open(file_path, 'wb') as pdf:
             pisa.pisaDocument(BytesIO(html.encode('UTF-8')), pdf)
-        return [file_name, file_path]
+        #return [file_name, file_path]
+        return file_path

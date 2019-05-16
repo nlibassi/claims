@@ -29,6 +29,10 @@ from django.forms import ModelForm
 
 from django.core.exceptions import ValidationError
 
+from threading import Thread, activeCount
+
+from django.core.mail import send_mail, EmailMessage
+
 
 # helper functions
 
@@ -397,7 +401,7 @@ class DependentProfileUpdated(TemplateView):
     template_name = 'dependent_profile_updated.html'
 
 
-class Pdf(View):
+class DisplayPdf(View):
     template_name = 'pdf.html'
 
     def get(self, request, *args, **kwargs):
@@ -426,4 +430,59 @@ class Pdf(View):
                 'request': request,
         }
         return Render.render('pdf.html', params)
-        # no need for HttpResponse here as it is handled by the Render.render method
+
+
+# remove repeated code from DisplayPdf (use decorator?)
+class ReportSubmittedView(View):
+    template_name = 'report_submitted.html'
+
+    def get(self, request, *args, **kwargs):
+        #sales = Sales.objects.all()
+        profile_slug = self.kwargs['profile_slug']
+        report = Report.objects.filter(submitted=False).get(patient_slug=profile_slug)
+        claims = Claim.objects.filter(report=report)
+        report_first_last_name = profile_slug_to_first_last_name(profile_slug)
+        today = timezone.now()
+        claims_usd_list = [claim.usd_charges for claim in claims]
+        total_claims_usd = sum(claims_usd_list)
+
+        insured_profile = report.insured_profile
+        if  report.dependent_profile:
+            patient_profile = report.dependent_profile
+        else:
+            patient_profile = insured_profile
+        params = {
+                'patient_name': report_first_last_name,
+                'today': today,
+                'report': report,
+                'claims': claims,
+                'insured_profile': insured_profile,
+                'patient_profile': patient_profile,
+                'total_claims_usd': total_claims_usd,
+                'request': request,
+        }
+        file = Render.render_to_file('pdf.html', params)
+        subject = 'Claim Report'
+        text = 'Please find the attached claim report.'
+        # test email addresses
+        from_email = ['nlibassi@gmail.com']
+        to_email = ['nickl@hush.com']
+
+        email = EmailMessage(subject, text, from_email, to_email,)
+        #try:
+        email.attach_file(file)
+        #except:
+            #return "Attachment erorr"
+        email.send()
+        #report.submitted = True
+        #return HttpResponseRedirect('report_submitted')
+        return render(request, 'report_submitted.html', {'profile_slug': profile_slug})
+        #return reverse_lazy('report_submitted.html', kwargs={'profile_slug': profile_slug})
+
+        # use threading after test
+        #thread = Thread(target=email.send())
+        #thread.start()
+
+
+#class ReportSubmitted(TemplateView):
+    #template_name = 'report_submitted.html'

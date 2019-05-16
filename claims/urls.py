@@ -16,11 +16,12 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from submission.views import Pdf
+# why not put this in submission.urls only?
+#from submission.views import DisplayPdf
 
 # change admin to something else to keep users out of admin
 urlpatterns = [url(r'^admin/', include(admin.site.urls)),
-    url(r'^render/pdf/', Pdf.as_view()),
+    #url(r'^render/pdf/', DisplayPdf.as_view()),
     url(r'^', include('submission.urls')),
 ]
 

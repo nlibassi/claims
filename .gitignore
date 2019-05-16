@@ -1,4 +1,5 @@
 db.sqlite3
 __pychache__
 *.pyc
-claims/settings.py
+.env
+store/

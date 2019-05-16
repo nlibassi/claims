@@ -56,7 +56,9 @@ urlpatterns = [
     #url(r'^delete_claim/$', views.delete_claim, name='delete_claim'),
     url(r'^update_claim/(?P<pk>\d+)/$', views.ClaimUpdateView.as_view(), name='update_claim'),
     url(r'^delete_claim/(?P<pk>\d+)/$', views.ClaimDeleteView.as_view(), name='delete_claim'),
-    url(r'^report_details/(?P<profile_slug>[-\w]+)/$', views.Pdf.as_view(template_name='pdf.html'), name='pdf_report'),
+    url(r'^report_details/(?P<profile_slug>[-\w]+)/$', views.DisplayPdf.as_view(template_name='pdf.html'), name='display_report'),
+    #url(r'^submit_report/(?P<profile_slug>[-\w]+)/$', views.SubmitPdf.as_view(template_name='report_submitted.html'), name='submit_report'),
+    url(r'^report_submitted/(?P<profile_slug>[-\w]+)/$', views.ReportSubmittedView.as_view(template_name='report_submitted.html'), name='report_submitted'),
     url(r'^$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
     ]
 
