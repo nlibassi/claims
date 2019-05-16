@@ -243,33 +243,6 @@ class ReportCreatedView(View):
             # can I render a different view here if validation fails?
  
 
-    # trash
-    """
-    def get(self, request):
-        insured_profile = request.user.insuredprofile
-        if request.user.first_name in request:
-            report = Report.objects.create(insured_profile=insured_profile)
-        elif request.user.first_name not in request:
-            for dependent in request.user.dependents.all:
-                if dependent.first_name in request:
-                    dependent_profile = dependent.dependentprofile
-                    report = Report.objects.create(insured_profile=insured_profile, dependent_profile=dependent_profile)
-        else:
-            print('no report created')
-        report.save()
-        return super(ReportCreatedView, self)
-    """
-        
-
-    # from example
-    """
-    def get_context_data(self, **kwargs):
-        context = super(ReportCreatedView, self).get_context_data(**kwargs)
-        context['latest_articles'] = Article.objects.all()[:5]
-        return context
-    """
-
-
 class ClaimCreateView(CreateView):
     form_class = ClaimForm
     template_name = 'complete_claim_form'
@@ -413,111 +386,12 @@ class ClaimDeleteView(DeleteView):
     """
 
         #return Claim.objects.filter(report__patient_slug=profile_slug)
-"""
-class UpdateProfileForm(View):
-    form_class = InsuredProfileForm
-    template_name = 'insuredprofile_form.html'
 
-    # Handle GET HTTP requests
-    def get(self, request, *args, **kwargs):
-        print('get request received')
-        #form = self.form_class(initial=self.initial)
-        if request.user.insuredprofile.profile_complete:
-            profile = request.user.insuredprofile
-            form = self.form_class(request.GET, instance=profile)
-        else:
-            form = self.form_class()
-        return render(request, self.template_name, {'form': form})
-
-    # Handle POST HTTP requests
-    def post(self, request, *args, **kwargs):
-        print('post request received')
-        try:
-            profile = request.user.insuredprofile
-        except InsuredProfile.DoesNotExist:
-            profile = InsuredProfile(user=request.user)
-        form = InsuredProfileForm(request.POST, instance=profile)
-        #form = self.form_class(request.POST)
-        if form.is_valid():
-            form.save()
-            #instance = form.save(commit=False)
-            #instance.user = request.user
-            #instance.save()
-            return HttpResponseRedirect('/profile_updated/')
-
-        return render(request, self.template_name, {'form': form})
-
-def bound_form(request, id): 
-    profile = get_object_or_404(InsuredProfile, id=id)
-    form = InsuredProfileForm(instance=profile) 
-    return render_to_response('insuredprofile_form.html', {'form': form}) 
-"""
-# partially working FBV 3/21 (post not allowed)
-"""
-def update_profile_form(request):
-    try:
-        instance = request.user.insuredprofile
-    except InsuredProfile.DoesNotExist:
-        instance = InsuredProfile(user=request.user)
-
-    instance = get_object_or_404(InsuredProfile, user=request.user)
-    if request.method == 'POST':
-        print('post request received')
-        form = InsuredProfileForm(request.POST, request.FILES, instance=instance)
-        if form.is_valid():
-            print('form is valid')
-            instance = form.save(commit=False)
-            instance.user = request.user
-            instance.save()
-    else:
-        print('non-post request received')
-        form = InsuredProfileForm(instance=instance)
-    context = {
-       "form": form,
-       "instance": instance,}
-    return render(request, "insuredprofile_form.html", context)
-"""
-"""
-class InsuredProfileCreate(LoginRequiredMixin, generic.CreateView):
-    #login_url = '/login/'
-    #model = InsuredProfile
-    print('console test - InsuredProfileCreate recognized')
-    # form is displayed without template_name being defined
-    template_name = 'insuredprofile_form.html'
-    http_method_names = ['get', 'post']
-    form_class = InsuredProfileForm
-    success_url = reverse_lazy('profile_complete')
-
-    def form_valid(self,form):
-        super(InsuredProfileCreate, self).form_valid(form)
-        # Add action to valid form phase
-        messages.success(self.request, 'Profile created successfully!')        
-        return HttpResponseRedirect(self.get_success_url())        
-    def form_invalid(self,form):
-        # Add action to invalid form phase
-        messages.info(self.request, 'Profile not created')
-        return self.render_to_response(self.get_context_data(form=form))
-"""
 
 class InsuredProfileUpdated(TemplateView):
     template_name = 'profile_updated.html'
     #http_method_names = ['get']
 
-    """
-    def get_context_data(self, *args, **kwargs):
-        context = super(InsuredProfileComplete.self).get_context_data(*args, **kwargs)
-        context['message'] = 'Testing'
-        return context
-    """
-    #http_method_names = ['get', 'post']
-"""
-class InsuredProfileComplete(View):
-    def post(self, request):
-        params = {'request': request}
-        return Render.render('profile_complete.html', params)
- 
-    #def post(self, request, *args, **kwargs):
-"""
 
 class DependentProfileUpdated(TemplateView):
     template_name = 'dependent_profile_updated.html'
@@ -553,13 +427,3 @@ class Pdf(View):
         }
         return Render.render('pdf.html', params)
         # no need for HttpResponse here as it is handled by the Render.render method
-
-#def index(request):
-    #return HttpResponse("Hey, this is the submission index.")
-
-#class HelloPDFView(PDFTemplateView):
-    #template_name = 'hello.html'
-
-#class IndexView(generic.ListView):
-    #template_name = 'submission/hello.html'
-    #context_object_name = 'latest_question_list'
