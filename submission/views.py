@@ -71,11 +71,11 @@ def validate_single_open_report(request, profile_slug):
     patient_reports = Report.objects.filter(patient_slug=profile_slug)
     name_first_last_title = profile_slug_to_first_last_name(profile_slug)
     if patient_reports:
-        if not any([report.submitted for report in patient_reports]):
+        if any([report.submitted == False for report in patient_reports]):
             messages.error(request, "Please first submit open report for {}.".format(name_first_last_title))
             #raise ValidationError("Please first submit open report for {}.".format(name_first_last_title))
-    else:
-        return True
+        else:
+            return True
 
 # Views - FBVs
 
@@ -258,8 +258,6 @@ class ClaimCreateView(CreateView):
         profile_slug = self.kwargs['profile_slug']
         return reverse_lazy('claim_list', kwargs={'profile_slug': profile_slug})
     
-    # trying to pre-populate the form with this - should this be done in the form itself instead?
-    # COME BACK AND DO PRE-POPULATION OF FORM HERE OR ELSEWHERE
     
     def get(self, request, profile_slug, *args, **kwargs):
         #form = self.form_class(initial=self.initial)
@@ -460,7 +458,7 @@ class ReportSubmittedView(View):
                 'total_claims_usd': total_claims_usd,
                 'request': request,
         }
-        file = Render.render_to_file('pdf.html', params)
+        report_file = Render.render_to_file('pdf.html', params)
         subject = 'Claim Report'
         text = 'Please find the attached claim report.'
         # test email addresses
@@ -469,7 +467,14 @@ class ReportSubmittedView(View):
 
         email = EmailMessage(subject, text, from_email, to_email,)
         #try:
-        email.attach_file(file)
+        email.attach_file(report_file)
+
+        # attach receipts to email
+        receipt_image_urls = [claim.receipt_image.url for claim in claims if claim.receipt_image]
+        receipt_file_urls = [claim.receipt_file.url for claim in claims if claim.receipt_file]
+        receipt_urls = receipt_image_urls + receipt_file_urls
+        for receipt_url in receipt_urls:
+            email.attach_file(receipt_url)
         #except:
             #return "Attachment erorr"
         email.send()
