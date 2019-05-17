@@ -3,7 +3,7 @@
 {% block content %}
 {% if request.user.insuredprofile.profile_complete %}
 <p>Update profile for {{ request.user.insuredprofile.first_name }}.</p>
-<form method="POST" action="{% url 'update_profile_form' request.user.pk %}">
+<form method="POST" action="{% url 'update_profile_form' request.user.insuredprofile.pk %}">
   {% csrf_token %}
   <table border="0">
       {{ form }}
@@ -12,7 +12,7 @@
 </form>
 {% else %}
 <p>Complete profile for {{ request.user.get_username }}.</p>
-<form method="POST" action="{% url 'update_profile_form' request.user.pk %}">
+<form method="POST" action="{% url 'update_profile_form' request.user.insuredprofile.pk %}">
   {% csrf_token %}
   <table border="0">
       {{ form }}

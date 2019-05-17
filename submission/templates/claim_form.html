@@ -2,11 +2,11 @@
 
 {% block content %}
 <p>Complete claim form for {{ patient_first_last_name }}:</p>
-<form method="POST" action="{% url 'complete_claim_form' profile_slug %}">
+<form method="POST" enctype="multipart/form-data" action="{% url 'complete_claim_form' profile_slug %}">
   {% csrf_token %}
   <table border="0">
       {{ form }}
   </table>
-  <button type="submit">Submit</button>
+  <button type="submit">Add Claim</button>
 </form>
 {% endblock %}

@@ -21,7 +21,7 @@ class InsuredProfileForm(ProfileForm):
                         'date_of_birth', 'email', 'air_id', 'mailing_street', 'mailing_optional', 'mailing_city',
                         'mailing_state', 'mailing_zip', 'residence_country', 'foreign_currency_default', 'other_coverage', 
                         'other_insurance_co', 'other_plan_name', 'other_plan_id', 'medicare_part_a', 
-                        'medicare_part_b', 'medicare_id', 'has_dependent']
+                        'medicare_part_b', 'medicare_id',]
         widgets = {
                 'description': forms.Textarea(),
         }
@@ -70,7 +70,8 @@ class ClaimForm(forms.ModelForm):
         model = Claim
         fields = ['diagnosis', 'employment_related', 'auto_accident_related',
         'other_accident_related', 'full_time_student', 'claim_type', 'service_date',
-        'service_description', 'service_place', 'foreign_charges', 'foreign_currency']
+        'service_description', 'service_place', 'foreign_charges', 'foreign_currency',
+        'receipt_file', 'receipt_image',]
         widgets = {
             'description': forms.Textarea()
         }

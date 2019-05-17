@@ -19,6 +19,8 @@ from django.template.defaultfilters import slugify
 from django.core.exceptions import ValidationError
 
 from forex_python.converter import CurrencyRates
+
+import os
 # Create your models here.
 
 
@@ -141,7 +143,7 @@ class InsuredProfile(Profile):
     mailing_zip = models.CharField('Mailing - Zip', max_length=10, null=True)
     #mailing_country = models.CharField('Mailing - Country', max_length=64, choices=COUNTRY_CHOICES, null=True)
     # this field may or may not be necessary
-    has_dependent = models.CharField('Does insured have dependents?', max_length=3, choices=AFFIRM_CHOICES)
+    #has_dependent = models.CharField('Does insured have dependents?', max_length=3, choices=AFFIRM_CHOICES)
 
     # not sure if this method should stay - may not matter as using try/except when completing/updating profile
 
@@ -153,6 +155,7 @@ class InsuredProfile(Profile):
        return (f'{self.__class__.__name__}('
                     f'{self.user!r})')
     
+
     def create_profile(sender, **kwargs):
         user = kwargs["instance"]
         if kwargs["created"]:
@@ -160,6 +163,7 @@ class InsuredProfile(Profile):
             insured_profile.relationship_to_insured = 'Self'
             insured_profile.save()
         
+    # why isn't this given as self.create_profile() here? connect expects only a method name, not call?
     post_save.connect(create_profile, sender=User)
 
 
@@ -168,7 +172,7 @@ class InsuredProfile(Profile):
         required_fields = [self.user, self.email, self.first_name, self.last_name, self.gender, self.date_of_birth, 
         self.relationship_to_insured, self.air_id, self.mailing_street, self.mailing_city, self.mailing_state, 
         self.mailing_zip, self.residence_country, self.foreign_currency_default, self.other_coverage, 
-        self.medicare_part_a, self.medicare_part_b, self.has_dependent]
+        self.medicare_part_a, self.medicare_part_b]
         if all(required_fields):
             return True
 
@@ -253,6 +257,11 @@ class Claim(models.Model):
     foreign_currency = models.CharField('Foreign Currency', max_length=64, choices=CURRENCY_CHOICES, null=False)
     exchange_rate = models.DecimalField('Exchange Rate', max_digits=30, decimal_places=10)
     usd_charges = models.DecimalField('USD Charges', max_digits=18, decimal_places=2)
+    receipt_file = models.FileField('Receipt as File', upload_to='store/', null=True, blank=True)
+    receipt_image = models.ImageField('Receipt as Image', upload_to='store/', null=True, blank=True)
+    #receipt_uploaded = models.BooleanField(default=False)
+    #receipt_uploaded_at = models.DateTimeField(editable=False)
+
 
     # may not want to do this, and/or it may need to be done before saving - just want to show it in the form
     def save(self, *args, **kwargs):

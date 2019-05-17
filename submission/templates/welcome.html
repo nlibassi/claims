@@ -37,7 +37,7 @@
     {% else %}
         <p>Welcome, {{ request.user.get_username }}. Thanks for logging in.</p>
         <h3>Please complete your profile before filing a claim.</h3>
-        <a href="{% url 'complete_profile_form' request.user.pk %}">Complete Profile</a>
+        <a href="{% url 'update_profile_form' request.user.insuredprofile.pk %}">Complete Profile</a>
         <br />
         <a href="{% url 'logout' %}">Logout</a>
     {% endif %}

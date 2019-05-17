@@ -282,6 +282,7 @@ class ClaimCreateView(CreateView):
         context = {'profile_slug': profile_slug, 'patient_first_last_name': patient_first_last_name}
         return context
 
+
     # profile_slug cannot be passed as arg here
     # The form_valid() method for CreateView and UpdateView saves the form, then redirects to the success url. 
     def form_valid(self, form):
@@ -292,12 +293,10 @@ class ClaimCreateView(CreateView):
         claim.report = Report.objects.filter(patient_slug=context['profile_slug']).get(submitted=False)
         # still may need to avoid defining profiles on both report and claims but doing this for now
         claim.dependent_profile = claim.report.dependent_profile
-        # later change this to patient reports
-        #user_reports = Report.objects.filter(report__insured_profile__user=self.request.user)
-        #claim.report = [report for report in user_reports if not report.submitted][0]
-        # dependent_profile should come from form used to create report
-        #claim.dependent_profile = self.request. # what?
-        claim.save() 
+        if claim.receipt_file or claim.receipt_image:
+            claim.save()
+        else:
+            messages.error(self.request, "Please first add receipt to claim.")
         return super(ClaimCreateView, self).form_valid(form)
 
     # cannot pass profile_slug to get_success_url() in this way

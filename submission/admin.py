@@ -3,7 +3,7 @@ from .models import *
 
 # should this go in models?
 class InsuredProfileAdmin(admin.ModelAdmin):
-    list_display = ('first_name', 'last_name',)
+    list_display = ('user', 'first_name', 'last_name',)
 
 class DependentProfileAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'insured', 'relationship_to_insured',)
