@@ -59,7 +59,7 @@ urlpatterns = [
     url(r'^report_details/(?P<profile_slug>[-\w]+)/$', views.DisplayPdf.as_view(template_name='pdf.html'), name='display_report'),
     #url(r'^submit_report/(?P<profile_slug>[-\w]+)/$', views.SubmitPdf.as_view(template_name='report_submitted.html'), name='submit_report'),
     url(r'^report_submitted/(?P<profile_slug>[-\w]+)/$', views.ReportSubmittedView.as_view(template_name='report_submitted.html'), name='report_submitted'),
-    url(r'^$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
+    url(r'^home/(?P<username>[-\w]+)/$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
     ]
 
 # may try to add username to url as below

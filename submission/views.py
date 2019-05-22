@@ -108,7 +108,7 @@ class Welcome(TemplateView):
     #success_url = reverse_lazy('welcome')
     template_name = 'welcome.html'
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         user_reports = self.request.user.insuredprofile.reports.all()
         open_user_reports = user_reports.filter(submitted=False)
         open_user_reports_patient_slugs = [open_user_report.patient_slug for open_user_report in open_user_reports]

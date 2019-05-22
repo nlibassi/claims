@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<form action="" method="post">
+<form action="{% url 'welcome' request.user.username %}" method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <input type="submit" value="login" /><br />
