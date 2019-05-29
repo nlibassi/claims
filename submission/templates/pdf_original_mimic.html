@@ -1,0 +1,267 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Claim Report</title>
+    <style type="text/css">
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+        .table {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 5px;
+            background-color: #fff;
+        }
+        .table th,
+        .table td {
+            padding: 5px;
+            vertical-align: top;
+            border-top: 1px solid #000;
+            text-align: center;
+        }
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #000;
+        }
+        .table tbody + tbody {
+            border-top: 2px solid #000;
+        }
+        .table .table {
+            background-color: #fff;
+        }
+
+        .patient-name-table{
+            width: auto;
+            table-layout: fixed;
+            border: 1px solid black;
+            max-width: 50px;
+            margin-bottom: 5px;
+            background-color: #fff;        
+        }
+        .patient-name-table td, th, thead{
+          border: 0;
+          text-align: center;
+          width: 100px;
+          padding-top: 5px;
+        }
+
+        .patient-dob-table{
+            float: right;
+            width: auto;
+            table-layout: fixed;
+            border: 1px solid black;
+            max-width: 300px;
+            margin-bottom: 5px;
+            background-color: #fff;        
+        }
+        .patient-dob-table td, th, thead{
+          border: 0;
+          text-align: center;
+          width: 100px;
+          padding-top: 5px;
+        }
+        .claim-table{
+            width: auto;
+            max-width: 100%;
+            margin-bottom: 5px;
+            background-color: #fff;
+        }
+
+        .claim-table th,
+        .claim-table td {
+          border-style: solid;
+          text-align: center;
+          border-top: 1px solid #000;
+          border-right: 1px solid #000;
+          border-bottom: 1px solid #000;
+          border-left: 1px solid #000;
+          padding-top: 5px;
+        }
+        .claim-table tr:nth-child(even){background-color: #fff;}
+        .claim-table tr:nth-child(odd){background-color: #ccc;}
+        .list-group {
+            display: block;
+            width: 100%;
+            list-style: none;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .list-group p {
+            width: 100%;
+            height: 20px;
+            line-height: 20px;
+            list-style: none;
+            font-size: 1.1em;
+        }
+        .card-header {
+          float: left;
+          width: 450px;
+        }
+        .card-header p {
+          float: left;
+        }
+        .card-header2 {
+          float: right;
+        }
+        .card-header2 p {
+          float: right;
+        }
+    </style>
+</head>
+<body>
+
+<!--<div class="container">-->
+    <!--<div class="card">-->
+        <div class="card-header">
+            <h3><i>Alternative Insurance Resources, Inc.</i></h3>
+        </div>
+        
+        <div class="card-header2">
+            <h3><b>Foreign Expenses Claim Form</b></h3>
+        </div>
+
+        <div class="list-group">
+            <h3>Patient Name: {{ patient_name }}</h3>
+        </div>
+
+
+        <table class="patient-name-table" style="float: left;">
+        <th>1. Patient's Name</th>
+        <tbody>
+            <tr>
+                <td>{{ patient_profile.last_name }}</td>
+                <td>{{ patient_profile.first_name }}</td>
+                <td>{{ patient_profile.middle_name }}</td>
+            </tr>
+        </tbody>
+            <thead>
+            <tr>
+                <th>Last</th>
+                <th>First</th>
+                <th>Middle</th>
+            </tr>
+            </thead>
+        </table>
+
+        <table class="patient-dob-table" style="float: right;">
+        <th>2. Patient's Date of Birth and Sex</th>
+        <tbody>
+            <tr>
+                <td>{{ patient_profile.date_of_birth }}</td>
+                <td>{{ patient_profile.gender }}</td>
+            </tr>
+        </tbody>
+            <thead>
+            <tr>
+                <th>DOB (format?)</th>
+                <th>Sex</th>
+            </tr>
+            </thead>
+        </table>
+
+
+        <table class="table">
+            <th>Employee Information</th>
+            <thead>
+            <tr>
+                <th>First</th>
+                <th>Middle</th>
+                <th>Last</th>
+                <th>ID</th>
+                <th>Street</th>
+                <th>Address Overflow</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Zip</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ insured_profile.first_name }}</td>
+                    <td>{{ insured_profile.middle_name }}</td>
+                    <td>{{ insured_profile.last_name }}</td>
+                    <td>{{ insured_profile.air_id }}</td>
+                    <td>{{ insured_profile.mailing_street }}</td>
+                    <td>{{ insured_profile.mailing_optional }}</td>
+                    <td>{{ insured_profile.mailing_city }}</td>
+                    <td>{{ insured_profile.mailing_state }}</td>
+                    <td>{{ insured_profile.mailing_zip }}</td> 
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="table">
+            <th>Patient Information</th>
+            <thead>
+            <tr>
+                <th>First</th>
+                <th>Middle</th>
+                <th>Last</th>
+                <th>DOB</th>
+                <th>Gender</th>
+                <th>Relationship to Insured</th>
+                <th>Other Coverage?</th>
+                <th>Other Provider</th>
+                <th>Other Plan</th>
+                <th>Other Plan ID</th>
+                <th>Medicare A</th>
+                <th>Medicare B</th>
+                <th>Medicare ID</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ patient_profile.first_name }}</td>
+                    <td>{{ patient_profile.middle_name }}</td>
+                    <td>{{ patient_profile.last_name }}</td>
+                    <td>{{ patient_profile.date_of_birth }}</td>
+                    <td>{{ patient_profile.gender }}</td>
+                    <td>{{ patient_profile.relationship_to_insured }}</td>
+                    <td>{{ patient_profile.other_coverage }}</td>
+                    <td>{{ patient_profile.other_insurance_co }}</td>
+                    <td>{{ patient_profile.other_plan_name }}</td>
+                    <td>{{ patient_profile.other_plan_id }}</td>
+                    <td>{{ patient_profile.medicare_part_a }}</td>
+                    <td>{{ patient_profile.medicare_part_b }}</td>
+                    <td>{{ patient_profile.medicare_id }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="claim-table">
+            <th>CLAIMS</th>
+            <thead>
+            <tr>
+                <th>Claim Type</th>
+                <th>Date of Service</th>
+                <th>Desc of Service</th>
+                <th>Place of Service</th>
+                <th>Foreign charges</th>
+                <th>Exch rate</th>
+                <th>USD</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for claim in claims %}
+                <tr>
+                    <td>{{ claim.claim_type }}</td>
+                    <td>{{ claim.service_date }}</td>
+                    <td>{{ claim.service_description }}</td>
+                    <td>{{ claim.service_place }}</td>
+                    <td>{{ claim.foreign_charges }} {{claim.foreign_currency}}</td>
+                    <td>{{ claim.exchange_rate|floatformat:4 }}</td>
+                    <td>{{ claim.usd_charges }}</td>   
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <h3>Total USD: {{ total_claims_usd }}</h3>
+        <p>Signature: {{ insured_profile.first_name }} {{insured_profile.last_name}} </p>
+        <p>Date: {{ today | date:"m/d/Y" }}</p>
+    <!--</div>-->
+<!--</div>-->
+
+</body>
+</html>

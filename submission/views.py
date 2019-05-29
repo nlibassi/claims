@@ -399,7 +399,7 @@ class DependentProfileUpdated(TemplateView):
 
 
 class DisplayPdf(View):
-    template_name = 'pdf.html'
+    template_name = 'pdf_original_mimic.html'
 
     def get(self, request, *args, **kwargs):
         #sales = Sales.objects.all()
@@ -426,7 +426,7 @@ class DisplayPdf(View):
                 'total_claims_usd': total_claims_usd,
                 'request': request,
         }
-        return Render.render('pdf.html', params)
+        return Render.render('pdf_original_mimic.html', params)
 
 
 # remove repeated code from DisplayPdf (use decorator?)
@@ -458,7 +458,7 @@ class ReportSubmittedView(View):
                 'total_claims_usd': total_claims_usd,
                 'request': request,
         }
-        report_file = Render.render_to_file('pdf.html', params)
+        report_file = Render.render_to_file('pdf_original_mimic.html', params)
         subject = 'Claim Report'
         text = 'Please find the attached claim report.'
         # test email addresses
