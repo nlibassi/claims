@@ -183,13 +183,15 @@ class DependentProfile(Profile):
     # better related name would be dependent_profiles
     insured = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dependents')
     #base_profile = models.OneToOneField(Profile, on_delete=None)
-    full_time_student = models.CharField('Is dependent full-time student?', max_length=1, choices=AFFIRM_CHOICES)
+    full_time_student = models.CharField('Is dependent full-time student?', max_length=1, choices=AFFIRM_CHOICES, default='N')
+    school_name = models.CharField('School Name', max_length=128, default=None)
 
     def save(self, *args, **kwargs):
         """ On save, populate created field with timestamp """
         if not self.id:
             self.created = timezone.now()
         return super(DependentProfile, self).save(*args, **kwargs)
+
 
     @property
     def profile_complete(self):
@@ -211,6 +213,14 @@ class Report(models.Model):
     created = models.DateTimeField(editable=False)
     insured_profile = models.ForeignKey(InsuredProfile, on_delete=models.PROTECT, null=False, related_name='reports')
     dependent_profile = models.ForeignKey(DependentProfile, on_delete=models.PROTECT, null=True)
+    diagnosis = models.CharField('Diagnosis', max_length=64, null=False)
+    employment_related = models.CharField('Due to employment-related accident?', max_length=3, choices=AFFIRM_CHOICES, null=False, default='N')
+    auto_accident_related = models.CharField('Due to auto accident?', max_length=3, choices=AFFIRM_CHOICES, null=False, default='N')
+    other_accident_related = models.CharField('Due to other accident?', max_length=3, choices=AFFIRM_CHOICES, null=False, default='N')
+    accident_date = models.DateTimeField('Accident/Onset Date', default=None, null=True, blank=True)
+    accident_details = models.CharField('Accident Details', max_length=255, default=None, null=True, blank=True)
+    full_time_student = models.CharField('Was patient full-time student at time of service?', max_length=1, choices=AFFIRM_CHOICES, default='N')
+    school_name = models.CharField('School Name', max_length=128, default=None, null=True, blank=True)
     submitted = models.BooleanField(default=False, null=False)
     patient_slug = models.SlugField(unique=False)  
 
@@ -244,11 +254,7 @@ class Claim(models.Model):
     # tried to avoid repeating this in both Report and Claim - does it matter?
     insured_profile = models.ForeignKey(InsuredProfile, on_delete=models.PROTECT, null=False)
     dependent_profile = models.ForeignKey(DependentProfile, on_delete=models.PROTECT, null=True)
-    diagnosis = models.CharField('Diagnosis', max_length=64, null=False)
-    employment_related = models.CharField('Due to employment-related accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)
-    auto_accident_related = models.CharField('Due to auto accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)
-    other_accident_related = models.CharField('Due to other accident?', max_length=3, choices=AFFIRM_CHOICES, null=False)
-    full_time_student = models.CharField('Was patient full-time student at time of service?', max_length=3, choices=AFFIRM_CHOICES)
+
     claim_type = models.CharField('Claim Type', max_length=2, choices=CLAIM_TYPE_CHOICES)
     service_date = models.DateField('Date of Service', null=False)
     service_description = models.CharField('Description of Service', max_length=64, null=False)

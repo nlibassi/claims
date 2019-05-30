@@ -1,0 +1,12 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<p>Complete report form for {{ patient_first_last_name }}:</p>
+<form method="POST" action="{% url 'complete_report_form' profile_slug %}">
+  {% csrf_token %}
+  <table border="0">
+      {{ form }}
+  </table>
+  <button type="submit">Create Report</button>
+</form>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import InsuredProfile, DependentProfile, Profile, Claim
+from .models import InsuredProfile, DependentProfile, Profile, Report, Claim
 import datetime
 
 class ProfileForm(forms.ModelForm):
@@ -62,16 +62,25 @@ class DependentProfileForm(ProfileForm):
         #item.code.save()
 
 
+# originally had no ReportForm as Report instance was created upon user selection of patient name
+class ReportForm(forms.ModelForm):
+    accident_date = forms.DateField(widget=forms.SelectDateWidget(
+        years=range(datetime.datetime.now().year - 5, datetime.datetime.now().year + 1)))
+
+    class Meta:
+        model = Report
+        fields = ['diagnosis', 'employment_related', 'auto_accident_related', 'other_accident_related', 
+                        'accident_date', 'accident_details', 'full_time_student', 'school_name']
+
+
 class ClaimForm(forms.ModelForm):
     service_date = forms.DateField(widget=forms.SelectDateWidget(
         years=range(datetime.datetime.now().year - 5, datetime.datetime.now().year + 1)))
 
     class Meta:
         model = Claim
-        fields = ['diagnosis', 'employment_related', 'auto_accident_related',
-        'other_accident_related', 'full_time_student', 'claim_type', 'service_date',
-        'service_description', 'service_place', 'foreign_charges', 'foreign_currency',
-        'receipt_file', 'receipt_image',]
+        fields = ['claim_type', 'service_date', 'service_description', 'service_place', 
+        'foreign_charges', 'foreign_currency', 'receipt_file', 'receipt_image',]
         widgets = {
             'description': forms.Textarea()
         }

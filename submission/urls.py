@@ -10,6 +10,8 @@ from . import views
 # but have not yet gotten it  working
 
 from django.contrib.auth import views as auth_views
+
+from django.contrib.auth.decorators import login_required
 """
 from django.urls import reverse_lazy
 from django.contrib.auth.views import(
@@ -48,10 +50,11 @@ urlpatterns = [
     url(r'^dependent_profile_complete/$', views.DependentProfileCompleteView.as_view(template_name='dependent_profile_complete.html'), name='dependent_profile_complete'),
     url(r'^update_dependent_profile/(?P<pk>\d+)/$', views.DependentProfileUpdateView.as_view(template_name='dependentprofile_form_update.html'), name='update_dependent_profile'),
     url(r'^dependent_profile_updated/$', views.DependentProfileUpdated.as_view(), name='dependent_profile_updated'),
+    url(r'^complete_report_form/(?P<profile_slug>[-\w]+)/$', views.ReportCreateView.as_view(template_name='report_form.html'), name='complete_report_form'),
+    url(r'^report_created/(?P<profile_slug>[-\w]+)/$', views.ReportCreatedView.as_view(template_name='report_created.html'), name='report_created'),
     url(r'^complete_claim_form/(?P<profile_slug>[-\w]+)/$', views.ClaimCreateView.as_view(template_name='claim_form.html'), name='complete_claim_form'),
     #url(r'^(?P<first_name>\w+)/$', views.DependentProfileUpdateView.as_view(template_name='dependentprofile_form.html'), name='update_dependent_profile'),
     #url(r'^file_claim_report/$', TemplateView.as_view(template_name='file_claim_report.html'), name='file_claim_report'),
-    url(r'^report_created/(?P<profile_slug>[-\w]+)/$', views.ReportCreatedView.as_view(template_name='report_created.html'), name='report_created'),
     url(r'^claim_list/(?P<profile_slug>[-\w]+)/$', views.ClaimListView.as_view(template_name='claim_list.html'), name='claim_list'),
     #url(r'^delete_claim/$', views.delete_claim, name='delete_claim'),
     url(r'^update_claim/(?P<pk>\d+)/$', views.ClaimUpdateView.as_view(), name='update_claim'),
@@ -59,7 +62,12 @@ urlpatterns = [
     url(r'^report_details/(?P<profile_slug>[-\w]+)/$', views.DisplayPdf.as_view(template_name='pdf_original_mimic.html'), name='display_report'),
     #url(r'^submit_report/(?P<profile_slug>[-\w]+)/$', views.SubmitPdf.as_view(template_name='report_submitted.html'), name='submit_report'),
     url(r'^report_submitted/(?P<profile_slug>[-\w]+)/$', views.ReportSubmittedView.as_view(template_name='report_submitted.html'), name='report_submitted'),
-    url(r'^home/(?P<username>[-\w\d]+)/$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
+    #url(r'', views.SignUp.as_view(), name='register'),
+    #url(r'^$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
+    url(r'^login/?welcome=/$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
+    #url(r'^$', login_required(views.Welcome.as_view(template_name='welcome.html')), name='welcome'),
+    #url(r'^home/(?P<username>[\w.@+-]+)/$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
+    #url(r'^home/$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
     ]
 
 # may try to add username to url as below

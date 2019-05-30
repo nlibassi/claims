@@ -12,7 +12,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.utils import timezone
 # add other models by name later
 from .models import InsuredProfile, DependentProfile, Report, Claim, Sales
-from .forms import InsuredProfileForm, DependentProfileForm, ClaimForm
+from .forms import InsuredProfileForm, DependentProfileForm, ReportForm, ClaimForm
 from .render import Render
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -32,6 +32,8 @@ from django.core.exceptions import ValidationError
 from threading import Thread, activeCount
 
 from django.core.mail import send_mail, EmailMessage
+
+from django.contrib.auth.views import LoginView
 
 
 # helper functions
@@ -104,27 +106,49 @@ class SignUp(CreateView):
         InsuredProfile.objects.create(user=user)
         return HttpResponse('User registered')
     """
-class Welcome(TemplateView):
+#class Welcome(TemplateView):
+class Welcome(LoginRequiredMixin, TemplateView):
     #success_url = reverse_lazy('welcome')
-    template_name = 'welcome.html'
+    login_url = '/login/'
+    redirect_field_name = 'welcome'
+    #template_name = 'welcome.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(LoginView, self).get_context_data(**kwargs)
+        context['next'] = self.request.GET.get('welcome')
+        return context
+
+    """
+    def get(self, request, **kwargs):
+        context = {'username': self.request.user.username}
+        return render(request, self.template_name, context=context)
+    """
 
     def post(self, request, *args, **kwargs):
-        user_reports = self.request.user.insuredprofile.reports.all()
-        open_user_reports = user_reports.filter(submitted=False)
-        open_user_reports_patient_slugs = [open_user_report.patient_slug for open_user_report in open_user_reports]
-        open_user_reports_first_names = [profile_slug_to_first_name(open_user_reports_patient_slug) \
-                                                             for open_user_reports_patient_slug in open_user_reports_patient_slugs]
-        context = {'open_user_reports_patient_slugs': open_user_reports_patient_slugs,
-                            'open_user_reports_first_names' : open_user_reports_first_names
-                        }
-        return render(request, self.template_name, context=context)
-
+        if self.request.user:
+            print('user: {}'.format(self.request.user.username))
+            user_reports = self.request.user.insuredprofile.reports.all()
+            open_user_reports = user_reports.filter(submitted=False)
+            open_user_reports_patient_slugs = [open_user_report.patient_slug for open_user_report in open_user_reports]
+            open_user_reports_first_names = [profile_slug_to_first_name(open_user_reports_patient_slug) \
+                                                                 for open_user_reports_patient_slug in open_user_reports_patient_slugs]
+            context = {'open_user_reports_patient_slugs': open_user_reports_patient_slugs,
+                                'open_user_reports_first_names' : open_user_reports_first_names,
+                            }
+            #return redirect(self.request.GET.get('next', 'welcome'))
+            return render(request, self.template_name, context=context)
+        else:
+            print('no user')
+        #else:
+            #return render(request, self.template_name)
     # get() method not required with TemplateView
     """
     def get(self, request):
         params = {'request': request}
         return Render.render('welcome.html', params)
     """
+
+    #def form_valid(self, form):
 
 # add login_required decorator to class or function
 
@@ -218,24 +242,28 @@ class DependentProfileUpdateView(UpdateView):
         return reverse_lazy('dependent_profile_updated')
 
 
-# turn this into CreateReportView - separate view where patient is chosen (single-field form?)
-class ReportCreatedView(View):
-    model = Report
-    template_name = 'report_created.html'
-    #http_method_names = ['get', 'post']
-    
-    # probably shouldn't be creating report in get() method but trying to 
-    # minimize user's clicks - but maybe should move report attribute population to post()
+class ReportCreateView(CreateView):
+    form_class = ReportForm
+    template_name = 'complete_report_form'
+
+    def get_success_url(self, **kwargs):
+        profile_slug = self.kwargs['profile_slug']
+        return reverse_lazy('report_created', kwargs={'profile_slug': profile_slug})
+
     def get(self, request, profile_slug):
         insured_profile = request.user.insuredprofile
+        # create report if single report open
         if validate_single_open_report(request, profile_slug):
             report = Report.objects.create(insured_profile=insured_profile)
+            # set profile slug of report and (if necessary) dependent profile
             if profile_slug != request.user.insuredprofile.profile_slug:
                 dependent_profiles = request.user.dependents.all()
                 for dependent_profile in dependent_profiles:
                     if dependent_profile.profile_slug == profile_slug:
                         report.dependent_profile = dependent_profile
                         report.patient_slug = dependent_profile.profile_slug
+                        form = self.form_class(initial={'full_time_student': dependent_profile.full_time_student,
+                                                                            'school_name': dependent_profile.school_name})
             else:
                 report.patient_slug = profile_slug
             report.save()
@@ -244,7 +272,14 @@ class ReportCreatedView(View):
             return render(request, self.template_name, context)
         else:
             return render(request, 'error.html')
-            # can I render a different view here if validation fails?
+
+    # add get_context_data() and form_valid() methods here?
+
+
+# turn this into CreateReportView - separate view where patient is chosen (single-field form?)
+class ReportCreatedView(View):
+    model = Report
+    template_name = 'report_created'
  
 
 class ClaimCreateView(CreateView):
@@ -264,10 +299,7 @@ class ClaimCreateView(CreateView):
         if profile_slug != self.request.user.insuredprofile.profile_slug:
             report = Report.objects.filter(submitted=False).get(patient_slug=profile_slug)
             dependent_profile = report.dependent_profile
-            form = self.form_class(initial={'foreign_currency': request.user.insuredprofile.foreign_currency_default,
-                                                        'full_time_student': dependent_profile.full_time_student})
-        else:
-            form = self.form_class(initial={'foreign_currency': request.user.insuredprofile.foreign_currency_default})
+        form = self.form_class(initial={'foreign_currency': request.user.insuredprofile.foreign_currency_default})
         #return render(request, self.template_name, {'form': form})
         patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
         return render(request, self.template_name, {'form': form, 'profile_slug': profile_slug, 'patient_first_last_name': patient_first_last_name})

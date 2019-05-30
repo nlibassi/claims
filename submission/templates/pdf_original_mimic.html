@@ -32,19 +32,21 @@
             background-color: #fff;
         }
 
-        .patient-name-table{
+        .info-table{
             width: auto;
             table-layout: fixed;
             border: 1px solid black;
             max-width: 50px;
             margin-bottom: 5px;
-            background-color: #fff;        
+            background-color: #fff;
+            white-space: nowrap;      
         }
-        .patient-name-table td, th, thead{
+        .info-table td, th, thead{
           border: 0;
           text-align: center;
           width: 100px;
           padding-top: 5px;
+          white-space: nowrap;
         }
 
         .patient-dob-table{
@@ -114,6 +116,8 @@
 
 <!--<div class="container">-->
     <!--<div class="card">-->
+<div class="container">
+    <div class="card">
         <div class="card-header">
             <h3><i>Alternative Insurance Resources, Inc.</i></h3>
         </div>
@@ -127,22 +131,120 @@
         </div>
 
 
-        <table class="patient-name-table" style="float: left;">
-        <th>1. Patient's Name</th>
+        <table class="info-table">
+        <th>Patient Information</th>
+            <thead>
+            <tr>
+                <th>Last Name</th>
+                <th>First Name</th>
+                <th>Middle Name</th>
+                <th>DOB (format?)</th>
+                <th>Sex</th>
+            </tr>
+            </thead>
         <tbody>
             <tr>
                 <td>{{ patient_profile.last_name }}</td>
                 <td>{{ patient_profile.first_name }}</td>
                 <td>{{ patient_profile.middle_name }}</td>
+                <td>{{ patient_profile.date_of_birth }}</td>
+                <td>{{ patient_profile.gender }}</td>
             </tr>
         </tbody>
+        </table>
+
+        <table class="info-table">
+        <th>Plan Information</th>
             <thead>
             <tr>
-                <th>Last</th>
-                <th>First</th>
-                <th>Middle</th>
+                <th>ID Number</th>
+                <th>Relationship to Employee</th>
             </tr>
             </thead>
+        <tbody>
+            <tr>
+                <td>{{ insured_profile.air_id }}</td>
+                <td>{{ patient_profile.relationship_to_insured }}</td>
+            </tr>
+        </tbody>
+        </table>
+
+        <table class="info-table">
+        <th>Employee Information</th>
+            <thead>
+            <tr>
+                <th>Last Name</th>
+                <th>First Name</th>
+                <th>Middle Name</th>
+                <th>Street</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Zip Code</th>
+            </tr>
+            </thead>
+        <tbody>
+            <tr>
+                <td>{{ insured_profile.last_name }}</td>
+                <td>{{ insured_profile.first_name }}</td>
+                <td>{{ insured_profile.middle_name }}</td>
+                <td>{{ insured_profile.mailing_street }}</td>
+                <td>{{ insured_profile.mailing_city }}</td>
+                <td>{{ insured_profile.mailing_state }}</td>
+                <td>{{ insured_profile.mailing_zip }}</td>
+            </tr>
+        </tbody>
+        </table>
+
+
+        <table class="info-table">
+        <th>Other group health plan for patient?</th>
+            <thead>
+            <tr>
+                <th>Y/N</th>
+                <th>Plan Name</th>
+                <th>ID Number</th>
+                <th>Plan Provider</th>
+                <th>Medicare Part A?</th>
+                <th>Medicare Part B?</th>
+                <th>Medicare Number</th>
+            </tr>
+            </thead>
+        <tbody>
+            <tr>
+                <td>{{ patient_profile.other_coverage }}</td>
+                <td>{{ patient_profile.other_insurance_co }}</td>
+                <td>{{ patient_profile.other_plan_name }}</td>
+                <td>{{ patient_profile.other_plan_id }}</td>
+                <td>{{ patient_profile.medicare_part_a }}</td>
+                <td>{{ patient_profile.medicare_part_b }}</td>
+                <td>{{ patient_profile.medicare_id }}</td>
+            </tr>
+        </tbody>
+        </table>
+
+
+        <table class="info-table">
+        <th>Condition related to?</th>
+            <thead>
+            <tr>
+                <th>Patient's Employment</th>
+                <th>Auto Accident</th>
+                <th>Other Accident/Injury</th>
+                <th>Date of Accident or Onset of Illness</th>
+                <th>Details of Accident</th>
+            </tr>
+            </thead>
+        <tbody>
+            <tr>
+                <td>{{ patient_profile.other_coverage }}</td>
+                <td>{{ patient_profile.other_insurance_co }}</td>
+                <td>{{ patient_profile.other_plan_name }}</td>
+                <td>{{ patient_profile.other_plan_id }}</td>
+                <td>{{ patient_profile.medicare_part_a }}</td>
+                <td>{{ patient_profile.medicare_part_b }}</td>
+                <td>{{ patient_profile.medicare_id }}</td>
+            </tr>
+        </tbody>
         </table>
 
         <table class="patient-dob-table" style="float: right;">
@@ -260,6 +362,8 @@
         <h3>Total USD: {{ total_claims_usd }}</h3>
         <p>Signature: {{ insured_profile.first_name }} {{insured_profile.last_name}} </p>
         <p>Date: {{ today | date:"m/d/Y" }}</p>
+    </div>
+</div>
     <!--</div>-->
 <!--</div>-->
 
