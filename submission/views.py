@@ -80,6 +80,8 @@ def validate_single_open_report(request, profile_slug):
             #raise ValidationError("Please first submit open report for {}.".format(name_first_last_title))
         else:
             return True
+    else:
+        return True
 
 # Views - FBVs
 
@@ -129,21 +131,27 @@ class Welcome(LoginRequiredMixin, TemplateView):
     """   
 
     #@login_required(login_url='/login/')
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         if self.request.user:
             print('user: {}'.format(self.request.user.username))
             user_reports = self.request.user.insuredprofile.reports.all()
-            open_user_reports = user_reports.filter(submitted=False)
-            open_user_reports_patient_slugs = [open_user_report.patient_slug for open_user_report in open_user_reports]
-            open_user_reports_first_names = [profile_slug_to_first_name(open_user_reports_patient_slug) \
-                                                                 for open_user_reports_patient_slug in open_user_reports_patient_slugs]
-            context = {'open_user_reports_patient_slugs': open_user_reports_patient_slugs,
-                                'open_user_reports_first_names' : open_user_reports_first_names,
-                            }
-            #return redirect(self.request.GET.get('next', 'welcome'))
-            return render(request, self.template_name, context=context)
-        else:
-            print('no user')
+            if user_reports:
+                open_user_reports = user_reports.filter(submitted=False)
+                if open_user_reports:
+                    print('open_user_reports: {}'.format(open_user_reports))
+                    open_user_reports_patient_slugs = [open_user_report.patient_slug for open_user_report in open_user_reports]
+                    #open_user_reports_first_names = [profile_slug_to_first_name(open_user_reports_patient_slug) for open_user_reports_patient_slug in open_user_reports_patient_slugs]
+                    open_user_reports_slug_name_dict = {patient_slug : profile_slug_to_first_name(patient_slug) \
+                                                                                 for patient_slug in open_user_reports_patient_slugs}
+                    print(open_user_reports_slug_name_dict)
+
+                    context = {'open_user_reports_slug_name_dict' : open_user_reports_slug_name_dict}
+                    #return redirect(self.request.GET.get('next', 'welcome'))
+                    return render(request, self.template_name, context=context)
+                else:
+                    return render(request, self.template_name)
+            else:
+                return render(request, self.template_name)
         #else:
             #return render(request, self.template_name)
     # get() method not required with TemplateView
@@ -251,34 +259,59 @@ class ReportCreateView(CreateView):
     form_class = ReportForm
     template_name = 'complete_report_form'
 
+
     def get_success_url(self, **kwargs):
         profile_slug = self.kwargs['profile_slug']
-        return reverse_lazy('complete_report_form', kwargs={'profile_slug': profile_slug})
+        return reverse_lazy('report_created', kwargs={'profile_slug': profile_slug})
 
-    def get(self, request, profile_slug):
+
+    def get_context_data(self, **kwargs):
+        profile_slug = self.kwargs['profile_slug']
+        context = {'profile_slug': profile_slug}
+        return context
+
+
+    def get(self, request, *args, **kwargs):
+        profile_slug = self.get_context_data()['profile_slug']
         insured_profile = request.user.insuredprofile
         # create report if single report open
         if validate_single_open_report(request, profile_slug):
-            report = Report.objects.create(insured_profile=insured_profile)
+            #print('single open report validated')
+            #report = Report.objects.create(insured_profile=insured_profile)
             # set profile slug of report and (if necessary) dependent profile
             if profile_slug != request.user.insuredprofile.profile_slug:
                 dependent_profiles = request.user.dependents.all()
                 for dependent_profile in dependent_profiles:
                     if dependent_profile.profile_slug == profile_slug:
-                        report.dependent_profile = dependent_profile
-                        report.patient_slug = dependent_profile.profile_slug
+                        #report.dependent_profile = dependent_profile
+                        #report.patient_slug = dependent_profile.profile_slug
                         form = self.form_class(initial={'full_time_student': dependent_profile.full_time_student,
                                                                             'school_name': dependent_profile.school_name})
             else:
                 report.patient_slug = profile_slug
+                form = self.form_class()
             report.save()
             patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
-            context = {'patient_first_last_name': patient_first_last_name, 'profile_slug': profile_slug}
+            context = {'patient_first_last_name': patient_first_last_name, 'profile_slug': profile_slug, 'form': form}
             return render(request, self.template_name, context)
         #else:
             #return render(request, 'error.html')
 
     # add get_context_data() and form_valid() methods here?
+
+
+    def form_valid(self, form):
+        report = form.save(commit=False)
+        report.insured_profile = self.request.user.insuredprofile
+        profile_slug = self.get_context_data()['profile_slug']
+        if profile_slug != self.request.user.insuredprofile.profile_slug:
+                dependent_profiles = self.request.user.dependents.all()
+                for dependent_profile in dependent_profiles:
+                    if dependent_profile.profile_slug == profile_slug:
+                        report.dependent_profile = dependent_profile
+        report.save()
+        return super(ReportCreateView, self).form_valid(form)
+
 
 
 # turn this into CreateReportView - separate view where patient is chosen (single-field form?)

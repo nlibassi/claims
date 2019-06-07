@@ -26,10 +26,10 @@
             {% endfor %}
         {% endif %}
         <br />
-        {% if open_user_reports_patient_slugs %}
+        {% if open_user_reports_slug_name_dict %}
         <h4>Continue Claim Report for:</h4>
-            {% for patient_slug in open_user_reports_patient_slugs %}        
-            <a href="{% url 'claim_list' patient_slug %}">{{ patient_slug }}</a>
+            {% for key, value in open_user_reports_slug_name_dict.items %}        
+            <a href="{% url 'claim_list' key %}">{{ value }}</a>
             {% endfor %}
         {% endif %}
         <br />

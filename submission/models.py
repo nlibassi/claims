@@ -184,7 +184,7 @@ class DependentProfile(Profile):
     insured = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dependents')
     #base_profile = models.OneToOneField(Profile, on_delete=None)
     full_time_student = models.CharField('Is dependent full-time student?', max_length=1, choices=AFFIRM_CHOICES, default='N')
-    school_name = models.CharField('School Name', max_length=128, default=None)
+    school_name = models.CharField('School Name', max_length=128, default=None, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         """ On save, populate created field with timestamp """
