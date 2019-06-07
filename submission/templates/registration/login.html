@@ -1,11 +1,10 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<form action="{% url 'welcome' %}" method="post">
-<input type="hidden" name="next" value="{{ next }}" />
+<form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <input type="submit" value="login" /><br />
+        <input type="submit" value="Login" /><br />
         <a href="{% url "register" %}">Register an Account</a>
         <a href="{% url "password_reset" %}">Can't Remember Password</a>
 </form>

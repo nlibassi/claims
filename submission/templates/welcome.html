@@ -19,10 +19,10 @@
         <a href="{% url 'complete_dependent_profile_form' %}">Add Dependent</a>
         <br />
         <h4>Create Claim Report for:</h4>
-        <a href="{% url 'report_created' request.user.insuredprofile.profile_slug %}">{{ request.user.insuredprofile.first_name }}</a>
+        <a href="{% url 'complete_report_form' request.user.insuredprofile.profile_slug %}">{{ request.user.insuredprofile.first_name }}</a>
         {% if request.user.dependents %}
             {% for dependent in request.user.dependents.all %}        
-            <a href="{% url 'report_created' dependent.profile_slug %}">{{ dependent.first_name }}</a>
+            <a href="{% url 'complete_report_form' dependent.profile_slug %}">{{ dependent.first_name }}</a>
             {% endfor %}
         {% endif %}
         <br />

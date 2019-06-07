@@ -64,10 +64,11 @@ urlpatterns = [
     url(r'^report_submitted/(?P<profile_slug>[-\w]+)/$', views.ReportSubmittedView.as_view(template_name='report_submitted.html'), name='report_submitted'),
     #url(r'', views.SignUp.as_view(), name='register'),
     #url(r'^$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
-    url(r'^login/?welcome=/$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
+    #url(r'^login/?welcome=/$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
     #url(r'^$', login_required(views.Welcome.as_view(template_name='welcome.html')), name='welcome'),
     #url(r'^home/(?P<username>[\w.@+-]+)/$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
-    #url(r'^home/$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
+    url(r'^home/$', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
+    #url(r'^', views.Welcome.as_view(template_name='welcome.html'), name='welcome'),
     ]
 
 # may try to add username to url as below

@@ -35,6 +35,8 @@ from django.core.mail import send_mail, EmailMessage
 
 from django.contrib.auth.views import LoginView
 
+from django.contrib.auth.decorators import login_required
+
 
 # helper functions
 
@@ -109,21 +111,24 @@ class SignUp(CreateView):
 #class Welcome(TemplateView):
 class Welcome(LoginRequiredMixin, TemplateView):
     #success_url = reverse_lazy('welcome')
-    login_url = '/login/'
-    redirect_field_name = 'welcome'
-    #template_name = 'welcome.html'
+    #login_url = '/login/'
+    #redirect_field_name = 'welcome'
+    template_name = 'welcome.html'
 
+    """
     def get_context_data(self, **kwargs):
         context = super(LoginView, self).get_context_data(**kwargs)
         context['next'] = self.request.GET.get('welcome')
         return context
 
-    """
+    
+
     def get(self, request, **kwargs):
         context = {'username': self.request.user.username}
         return render(request, self.template_name, context=context)
-    """
+    """   
 
+    #@login_required(login_url='/login/')
     def post(self, request, *args, **kwargs):
         if self.request.user:
             print('user: {}'.format(self.request.user.username))
@@ -248,7 +253,7 @@ class ReportCreateView(CreateView):
 
     def get_success_url(self, **kwargs):
         profile_slug = self.kwargs['profile_slug']
-        return reverse_lazy('report_created', kwargs={'profile_slug': profile_slug})
+        return reverse_lazy('complete_report_form', kwargs={'profile_slug': profile_slug})
 
     def get(self, request, profile_slug):
         insured_profile = request.user.insuredprofile
@@ -270,8 +275,8 @@ class ReportCreateView(CreateView):
             patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
             context = {'patient_first_last_name': patient_first_last_name, 'profile_slug': profile_slug}
             return render(request, self.template_name, context)
-        else:
-            return render(request, 'error.html')
+        #else:
+            #return render(request, 'error.html')
 
     # add get_context_data() and form_valid() methods here?
 
