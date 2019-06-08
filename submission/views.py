@@ -288,9 +288,9 @@ class ReportCreateView(CreateView):
                         form = self.form_class(initial={'full_time_student': dependent_profile.full_time_student,
                                                                             'school_name': dependent_profile.school_name})
             else:
-                report.patient_slug = profile_slug
+                #report.patient_slug = profile_slug
                 form = self.form_class()
-            report.save()
+            #report.save()
             patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
             context = {'patient_first_last_name': patient_first_last_name, 'profile_slug': profile_slug, 'form': form}
             return render(request, self.template_name, context)
@@ -304,6 +304,7 @@ class ReportCreateView(CreateView):
         report = form.save(commit=False)
         report.insured_profile = self.request.user.insuredprofile
         profile_slug = self.get_context_data()['profile_slug']
+        report.patient_slug = profile_slug
         if profile_slug != self.request.user.insuredprofile.profile_slug:
                 dependent_profiles = self.request.user.dependents.all()
                 for dependent_profile in dependent_profiles:
@@ -318,6 +319,13 @@ class ReportCreateView(CreateView):
 class ReportCreatedView(View):
     model = Report
     template_name = 'report_created'
+
+
+    def get(self, request, *args, **kwargs):
+        profile_slug = self.kwargs['profile_slug']
+        patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
+        context = {'profile_slug': profile_slug, 'patient_first_last_name': patient_first_last_name}
+        return render(request, self.template_name, context=context)
  
 
 class ClaimCreateView(CreateView):
@@ -331,7 +339,8 @@ class ClaimCreateView(CreateView):
         profile_slug = self.kwargs['profile_slug']
         return reverse_lazy('claim_list', kwargs={'profile_slug': profile_slug})
     
-    
+
+    # profile_slug should be removed from args - why is this allowed?
     def get(self, request, profile_slug, *args, **kwargs):
         #form = self.form_class(initial=self.initial)
         if profile_slug != self.request.user.insuredprofile.profile_slug:
