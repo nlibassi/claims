@@ -138,7 +138,7 @@
                 <th>Last Name</th>
                 <th>First Name</th>
                 <th>Middle Name</th>
-                <th>DOB (format?)</th>
+                <th>DOB</th>
                 <th>Sex</th>
             </tr>
             </thead>
@@ -236,101 +236,15 @@
             </thead>
         <tbody>
             <tr>
-                <td>{{ patient_profile.other_coverage }}</td>
-                <td>{{ patient_profile.other_insurance_co }}</td>
-                <td>{{ patient_profile.other_plan_name }}</td>
-                <td>{{ patient_profile.other_plan_id }}</td>
-                <td>{{ patient_profile.medicare_part_a }}</td>
-                <td>{{ patient_profile.medicare_part_b }}</td>
-                <td>{{ patient_profile.medicare_id }}</td>
+                <td>{{ report.employment_related }}</td>
+                <td>{{ report.auto_accident_related }}</td>
+                <td>{{ report.other_accident_related }}</td>
+                <td>{{ report.accident_date }}</td>
+                <td>{{ report.accident_details }}</td>
             </tr>
         </tbody>
         </table>
 
-        <table class="patient-dob-table" style="float: right;">
-        <th>2. Patient's Date of Birth and Sex</th>
-        <tbody>
-            <tr>
-                <td>{{ patient_profile.date_of_birth }}</td>
-                <td>{{ patient_profile.gender }}</td>
-            </tr>
-        </tbody>
-            <thead>
-            <tr>
-                <th>DOB (format?)</th>
-                <th>Sex</th>
-            </tr>
-            </thead>
-        </table>
-
-
-        <table class="table">
-            <th>Employee Information</th>
-            <thead>
-            <tr>
-                <th>First</th>
-                <th>Middle</th>
-                <th>Last</th>
-                <th>ID</th>
-                <th>Street</th>
-                <th>Address Overflow</th>
-                <th>City</th>
-                <th>State</th>
-                <th>Zip</th>
-            </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{{ insured_profile.first_name }}</td>
-                    <td>{{ insured_profile.middle_name }}</td>
-                    <td>{{ insured_profile.last_name }}</td>
-                    <td>{{ insured_profile.air_id }}</td>
-                    <td>{{ insured_profile.mailing_street }}</td>
-                    <td>{{ insured_profile.mailing_optional }}</td>
-                    <td>{{ insured_profile.mailing_city }}</td>
-                    <td>{{ insured_profile.mailing_state }}</td>
-                    <td>{{ insured_profile.mailing_zip }}</td> 
-                </tr>
-            </tbody>
-        </table>
-
-        <table class="table">
-            <th>Patient Information</th>
-            <thead>
-            <tr>
-                <th>First</th>
-                <th>Middle</th>
-                <th>Last</th>
-                <th>DOB</th>
-                <th>Gender</th>
-                <th>Relationship to Insured</th>
-                <th>Other Coverage?</th>
-                <th>Other Provider</th>
-                <th>Other Plan</th>
-                <th>Other Plan ID</th>
-                <th>Medicare A</th>
-                <th>Medicare B</th>
-                <th>Medicare ID</th>
-            </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{{ patient_profile.first_name }}</td>
-                    <td>{{ patient_profile.middle_name }}</td>
-                    <td>{{ patient_profile.last_name }}</td>
-                    <td>{{ patient_profile.date_of_birth }}</td>
-                    <td>{{ patient_profile.gender }}</td>
-                    <td>{{ patient_profile.relationship_to_insured }}</td>
-                    <td>{{ patient_profile.other_coverage }}</td>
-                    <td>{{ patient_profile.other_insurance_co }}</td>
-                    <td>{{ patient_profile.other_plan_name }}</td>
-                    <td>{{ patient_profile.other_plan_id }}</td>
-                    <td>{{ patient_profile.medicare_part_a }}</td>
-                    <td>{{ patient_profile.medicare_part_b }}</td>
-                    <td>{{ patient_profile.medicare_id }}</td>
-                </tr>
-            </tbody>
-        </table>
 
         <table class="claim-table">
             <th>CLAIMS</th>
