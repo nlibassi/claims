@@ -64,8 +64,8 @@ class DependentProfileForm(ProfileForm):
 
 # originally had no ReportForm as Report instance was created upon user selection of patient name
 class ReportForm(forms.ModelForm):
-    accident_date = forms.DateField(widget=forms.SelectDateWidget(
-        years=range(datetime.datetime.now().year - 5, datetime.datetime.now().year + 1)))
+    #accident_date = forms.DateField(widget=forms.SelectDateWidget(
+        #years=range(datetime.datetime.now().year - 5, datetime.datetime.now().year + 1)))
 
     class Meta:
         model = Report
