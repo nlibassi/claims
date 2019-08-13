@@ -83,6 +83,8 @@ def validate_single_open_report(request, profile_slug):
     else:
         return True
 
+
+
 # Views - FBVs
 
 """
@@ -270,7 +272,20 @@ class ReportCreateView(CreateView):
         context = {'profile_slug': profile_slug}
         return context
 
-
+    '''
+    def fields_required(self, fields):
+        """
+        Used for conditionally marking fields as required
+        args:
+        field: list of field names as strings
+        """
+        for field in fields:
+            if not self.cleaned_data.get(field, ''):
+                msg = ValidationError("This field is required.")
+                self.add_error(field, msg)
+    '''
+    # Create View has no clean() method
+    
     def get(self, request, *args, **kwargs):
         profile_slug = self.get_context_data()['profile_slug']
         insured_profile = request.user.insuredprofile
@@ -279,6 +294,9 @@ class ReportCreateView(CreateView):
             #print('single open report validated')
             #report = Report.objects.create(insured_profile=insured_profile)
             # set profile slug of report and (if necessary) dependent profile
+
+            # only used if fullt_time_student and school_name are part of dependent profile
+            """
             if profile_slug != request.user.insuredprofile.profile_slug:
                 dependent_profiles = request.user.dependents.all()
                 for dependent_profile in dependent_profiles:
@@ -290,6 +308,8 @@ class ReportCreateView(CreateView):
             else:
                 #report.patient_slug = profile_slug
                 form = self.form_class()
+            """
+            form = self.form_class()
             #report.save()
             patient_first_last_name = profile_slug_to_first_last_name(profile_slug)
             context = {'patient_first_last_name': patient_first_last_name, 'profile_slug': profile_slug, 'form': form}
@@ -310,6 +330,10 @@ class ReportCreateView(CreateView):
                 for dependent_profile in dependent_profiles:
                     if dependent_profile.profile_slug == profile_slug:
                         report.dependent_profile = dependent_profile
+        if report.auto_accident_related == 'Y' or report.other_accident_related == 'Y' \
+            and (report.accident_date is None or report.accident_details is None):
+            messages.error(self.request, "Both accident date and details are required.")
+            return super(ReportCreateView, self).form_invalid(form)
         report.save()
         return super(ReportCreateView, self).form_valid(form)
 
@@ -538,11 +562,12 @@ class ReportSubmittedView(View):
                 'request': request,
         }
         report_file = Render.render_to_file('pdf_original_mimic.html', params)
-        subject = 'Claim Report'
-        text = 'Please find the attached claim report.'
+        subject = 'Foreign Expense Claim Report'
+        text = 'Please find the attached foreign expense claim report.'
         # test email addresses
-        from_email = ['nlibassi@gmail.com']
-        to_email = ['nickl@hush.com']
+        from_email = ['nlibassi@hotmail.com']
+        # apparently to_email cannot match from_email
+        to_email = ['nlibassi@gmail.com']
 
         email = EmailMessage(subject, text, from_email, to_email,)
         #try:

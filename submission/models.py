@@ -101,7 +101,7 @@ class Profile(models.Model):
     middle_name = models.CharField('Middle Name', max_length=64)
     last_name = models.CharField('Last Name', max_length=64)
     gender = models.CharField('Gender', max_length=1, choices=GENDER_CHOICES)
-    relationship_to_insured = models.CharField('Relationship to insured', max_length=5, choices=RELATIONSHIP_CHOICES)
+    relationship_to_insured = models.CharField('Relationship to insured', max_length=6, choices=RELATIONSHIP_CHOICES)
     date_of_birth = models.DateField('Date of Birth', null=True)
     residence_country = models.CharField('Residence - Country', max_length=64, choices=COUNTRY_CHOICES, null=True)
     foreign_currency_default = models.CharField('Foreign Currency Default', max_length=64, choices=CURRENCY_CHOICES, null=True)
@@ -183,8 +183,6 @@ class DependentProfile(Profile):
     # better related name would be dependent_profiles
     insured = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dependents')
     #base_profile = models.OneToOneField(Profile, on_delete=None)
-    full_time_student = models.CharField('Is dependent full-time student?', max_length=1, choices=AFFIRM_CHOICES, default='N')
-    school_name = models.CharField('School Name', max_length=128, default=None, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         """ On save, populate created field with timestamp """
@@ -280,8 +278,8 @@ class Claim(models.Model):
         # for report in reports:
         if not self.id:
             self.created = timezone.now()
-        if self.dependent_profile:
-            self.full_time_student = self.dependent_profile.full_time_student
+        #if self.dependent_profile:
+            #self.full_time_student = self.dependent_profile.full_time_student
         conversion = CurrencyRates()
         self.exchange_rate = conversion.get_rate('USD', self.foreign_currency, self.service_date)
         self.usd_charges = float(self.foreign_charges) / self.exchange_rate

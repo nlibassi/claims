@@ -42,7 +42,7 @@ class DependentProfileForm(ProfileForm):
                         'date_of_birth', 'relationship_to_insured', 'residence_country',
                         'foreign_currency_default', 'other_coverage', 
                         'other_insurance_co', 'other_plan_name', 'other_plan_id', 'medicare_part_a', 
-                        'medicare_part_b', 'medicare_id', 'full_time_student']
+                        'medicare_part_b', 'medicare_id',]
         widgets = {
                 'description': forms.Textarea(),
         }
