@@ -21,8 +21,6 @@ class UserAdmin(admin.ModelAdmin):
 admin.site.site_url = None
 # Register your models here.
 
-admin.site.register(Sales)
-admin.site.register(Products)
 admin.site.register(InsuredProfile, InsuredProfileAdmin)
 admin.site.register(DependentProfile, DependentProfileAdmin)
 admin.site.register(Report, ReportAdmin)

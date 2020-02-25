@@ -11,7 +11,7 @@ from django.views.generic import View, TemplateView, DetailView, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.utils import timezone
 # add other models by name later
-from .models import InsuredProfile, DependentProfile, Report, Claim#, Sales
+from .models import InsuredProfile, DependentProfile, Report, Claim
 from .forms import InsuredProfileForm, DependentProfileForm, ReportForm, ClaimForm
 from .render import Render
 from django.contrib.auth.forms import UserCreationForm
