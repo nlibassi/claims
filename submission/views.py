@@ -11,7 +11,7 @@ from django.views.generic import View, TemplateView, DetailView, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.utils import timezone
 # add other models by name later
-from .models import InsuredProfile, DependentProfile, Report, Claim, Sales
+from .models import InsuredProfile, DependentProfile, Report, Claim#, Sales
 from .forms import InsuredProfileForm, DependentProfileForm, ReportForm, ClaimForm
 from .render import Render
 from django.contrib.auth.forms import UserCreationForm
@@ -563,13 +563,17 @@ class ReportSubmittedView(View):
         }
         report_file = Render.render_to_file('pdf_original_mimic.html', params)
         subject = 'Foreign Expense Claim Report'
-        text = 'Please find the attached foreign expense claim report.'
+        text = 'Please find the attached foreign expense claim report.\nRegards,\n' + insured_profile.first_name
         # test email addresses
-        from_email = ['nlibassi@hotmail.com']
+        #from_email = InsuredProfile.objects.get(email)
+        from_email = [insured_profile.email]
         # apparently to_email cannot match from_email
-        to_email = ['nlibassi@gmail.com']
+        to_email = ['nlibassi@grmbilisim.com']
+        cc = [insured_profile.email]
+        reply_to = [insured_profile.email]
 
-        email = EmailMessage(subject, text, from_email, to_email,)
+        #email = EmailMessage(subject=subject, body=text, from_email=from_email, to=to_email)
+        email = EmailMessage(subject=subject, body=text, from_email=from_email, to=to_email, cc=cc, reply_to=reply_to)
         #try:
         email.attach_file(report_file)
 
