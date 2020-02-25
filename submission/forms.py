@@ -75,7 +75,7 @@ class ReportForm(forms.ModelForm):
 
 class ClaimForm(forms.ModelForm):
     service_date = forms.DateField(widget=forms.SelectDateWidget(
-        years=range(datetime.datetime.now().year - 5, datetime.datetime.now().year + 1)))
+        years=range(datetime.datetime.now().year - 5, datetime.datetime.now().year + 1)), initial=datetime.date.today)
 
     class Meta:
         model = Claim
