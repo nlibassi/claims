@@ -1,1 +1,1 @@
-web: gunicorn quickforeignclaims.wsgi --log-file -
+web: gunicorn claims.wsgi --log-file -
