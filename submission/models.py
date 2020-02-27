@@ -227,7 +227,7 @@ class Claim(models.Model):
     foreign_currency = models.CharField('Foreign Currency', max_length=64, choices=CURRENCY_CHOICES, null=False)
     exchange_rate = models.DecimalField('Exchange Rate', max_digits=30, decimal_places=10)
     usd_charges = models.DecimalField('USD Charges', max_digits=18, decimal_places=2)
-    receipt_file = models.FileField('Receipt as File', upload_to='store/', null=True, blank=True)
+    receipt_file = models.FileField('Receipt as Pdf', upload_to='store/', null=True, blank=True)
     receipt_image = models.ImageField('Receipt as Image', upload_to='store/', null=True, blank=True)
     #receipt_uploaded = models.BooleanField(default=False)
     #receipt_uploaded_at = models.DateTimeField(editable=False)

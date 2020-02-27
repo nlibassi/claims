@@ -3,7 +3,7 @@ from .models import InsuredProfile, DependentProfile, Profile, Report, Claim
 import datetime
 
 class ProfileForm(forms.ModelForm):
-    date_of_birth = forms.DateField(widget=forms.SelectDateWidget(years=range(1900, datetime.datetime.now().year + 1)), initial = datetime.datetime.now().year - 50)
+    date_of_birth = forms.DateField(widget=forms.SelectDateWidget(years=range(1900, datetime.datetime.now().year + 1)), initial = datetime.datetime.now().year - 40)
 
     class Meta:
         model = Profile
