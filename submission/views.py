@@ -569,8 +569,8 @@ class ReportSubmittedView(View):
         #from_email = InsuredProfile.objects.get(email)
         from_email = ['quickforeignclaims@protonmail.com']
         # apparently to_email cannot match from_email
-        to_email = ['nlibassi@grmbilisim.com']
-        #to_email = ['claims@yourtpa.com']
+        #to_email = ['nlibassi@grmbilisim.com']
+        to_email = ['claims@yourtpa.com']
         cc = [insured_profile.email]
         reply_to = [insured_profile.email]
 
